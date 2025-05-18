@@ -11,8 +11,15 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
     depends_on:
-      - zipkin-container
+      zipkin-container:
+        condition: service_started
   cloud-config-container:
     build:
       context: ./cloud-config
@@ -23,9 +30,17 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9296/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
     depends_on:
-      - service-discovery-container
-      - zipkin-container
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   api-gateway-container:
     image: selimhorri/api-gateway-ecommerce-boot:0.1.0
     ports:
@@ -33,12 +48,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   proxy-client-container:
     image: selimhorri/proxy-client-ecommerce-boot:0.1.0
     ports:
@@ -46,12 +63,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   order-service-container:
     image: selimhorri/order-service-ecommerce-boot:0.1.0
     ports:
@@ -59,12 +78,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   payment-service-container:
     image: selimhorri/payment-service-ecommerce-boot:0.1.0
     ports:
@@ -72,12 +93,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   product-service-container:
     image: selimhorri/product-service-ecommerce-boot:0.1.0
     ports:
@@ -85,12 +108,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   shipping-service-container:
     image: selimhorri/shipping-service-ecommerce-boot:0.1.0
     ports:
@@ -98,12 +123,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   user-service-container:
     image: selimhorri/user-service-ecommerce-boot:0.1.0
     ports:
@@ -111,12 +138,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
   favourite-service-container:
     image: selimhorri/favourite-service-ecommerce-boot:0.1.0
     ports:
@@ -124,12 +153,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - SPRING_CONFIG_IMPORT=optional:configserver:http://cloud-config-container:9296
     depends_on:
-      - cloud-config-container
-      - service-discovery-container
-      - zipkin-container
+      cloud-config-container:
+        condition: service_healthy
+      service-discovery-container:
+        condition: service_healthy
+      zipkin-container:
+        condition: service_started
 
 
 

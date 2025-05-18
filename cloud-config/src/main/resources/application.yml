@@ -1,4 +1,3 @@
-
 server:
   port: 9296
 
@@ -11,8 +10,21 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/SelimHorri/cloud-config-server
+          uri: https://github.com/AndresCamiloRR/cloud-config-server
           clone-on-start: true
+          force-pull: true
+          timeout: 15
+          default-label: master
+    service-registry:
+      auto-registration:
+        enabled: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-discovery-container:8761/eureka/}
 
 resilience4j:
   circuitbreaker:
