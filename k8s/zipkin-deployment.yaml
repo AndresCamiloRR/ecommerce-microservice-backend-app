@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zipkin
+  labels:
+    app: zipkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin
+  template:
+    metadata:
+      labels:
+        app: zipkin
+    spec:
+      containers:
+      - name: zipkin
+        image: openzipkin/zipkin
+        ports:
+        - containerPort: 9411
+        readinessProbe:
+          httpGet:
+            path: /zipkin/health # Zipkin health endpoint
+            port: 9411
+          initialDelaySeconds: 10  # Espera 10s antes de la primera sonda
+          periodSeconds: 10        # Sondea cada 10s
+          failureThreshold: 3      # Considera fallido después de 3 intentos
+        livenessProbe:
+          httpGet:
+            path: /zipkin/health # Zipkin health endpoint
+            port: 9411
+          initialDelaySeconds: 30  # Espera 30s antes de la primera sonda
+          periodSeconds: 15        # Sondea cada 15s
+          failureThreshold: 3      # Considera fallido después de 3 intentos
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin
+spec:
+  selector:
+    app: zipkin
+  ports:
+  - port: 9411
+    targetPort: 9411
+  type: ClusterIP
