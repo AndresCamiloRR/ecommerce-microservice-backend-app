@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_USER        = 'ssh-username'
-        REMOTE_HOST        = 'ssh-hostname'
+        REMOTE_USER_ID        = 'ssh-username'
+        REMOTE_HOST_ID        = 'ssh-hostname'
         SSH_PASSWORD_ID    = 'ssh-password'
-        K8S_DIR            = 'ssh-k8s'
+        K8S_DIR_ID            = 'ssh-k8s'
     }
 
     stages {
