@@ -50,7 +50,12 @@ pipeline {
 
         stage('Deploy Remaining Services') {
             steps {
-                withCredentials([string(credentialsId: env.SSH_PASSWORD_ID, variable: 'SSH_PASSWORD')]) {
+                withCredentials([
+                        string(credentialsId: env.REMOTE_USER_ID,     variable: 'REMOTE_USER'),
+                        string(credentialsId: env.REMOTE_HOST_ID,     variable: 'REMOTE_HOST'),
+                        string(credentialsId: env.SSH_PASSWORD_ID,    variable: 'SSH_PASSWORD'),
+                        string(credentialsId: env.K8S_DIR_ID,         variable: 'K8S_DIR')
+                    ]) {
                     script {
                         def baseCmd = "sshpass -p \"${SSH_PASSWORD}\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
                         def services = [
