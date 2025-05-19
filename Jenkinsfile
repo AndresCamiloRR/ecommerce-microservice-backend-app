@@ -2,19 +2,24 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_USER        = 'andre'
-        REMOTE_HOST        = '192.168.56.1'
-        SSH_PASSWORD_ID    = 'ssh-password-andre'
-        K8S_DIR            = 'C:\\Cositas\\ecommerce-microservice-backend-app\\k8s'
+        REMOTE_USER        = 'ssh-username'
+        REMOTE_HOST        = 'ssh-hostname'
+        SSH_PASSWORD_ID    = 'ssh-password'
+        K8S_DIR            = 'ssh-k8s'
     }
 
     stages {
         stage('Deploy Core Services') {
             steps {
-                // Use SSH password (Secret Text)
-                withCredentials([string(credentialsId: env.SSH_PASSWORD_ID, variable: 'SSH_PASSWORD')]) {
+                // Obtener credenciales de Jenkins
+                withCredentials([
+                        string(credentialsId: env.REMOTE_USER_ID,     variable: 'REMOTE_USER'),
+                        string(credentialsId: env.REMOTE_HOST_ID,     variable: 'REMOTE_HOST'),
+                        string(credentialsId: env.SSH_PASSWORD_ID,    variable: 'SSH_PASSWORD'),
+                        string(credentialsId: env.K8S_DIR_ID,         variable: 'K8S_DIR')
+                    ]) {
                     script {
-                        // Usamos sshpass con la contraseña
+                        //  Definir el comando base para SSH
                         def baseCmd = "sshpass -p \"${SSH_PASSWORD}\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
                         sh "${baseCmd} 'echo Starting deployment of core services...'"
                         sh """
@@ -29,14 +34,14 @@ pipeline {
                             echo Deploying Service Discovery... && \
                             kubectl apply -f service-discovery-deployment.yaml && \
                             echo Waiting for Service Discovery to be ready... && \
-                            kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=180s'
+                            kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=200s'
                         """
                         sh """
                             ${baseCmd} 'cd ${env.K8S_DIR} && \
                             echo Deploying Cloud Config... && \
                             kubectl apply -f cloud-config-deployment.yaml && \
                             echo Waiting for Cloud Config to be ready... && \
-                            kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=180s'
+                            kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=200s'
                         """
                     }
                 }
