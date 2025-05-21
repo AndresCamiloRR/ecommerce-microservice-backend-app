@@ -31,7 +31,7 @@ pipeline {
                                 cd ecommerce-microservice-backend-app && \
                                 echo Repository cloned!; \
                             fi && \
-                            ./mvnw clean package -DskipTests && \
+                            ./mvnw clean package -DskipTests -pl -proxy-client && \
                             echo Project built successfully! && \
                             docker compose build && \
                             echo Docker images generated successfully!
