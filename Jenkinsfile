@@ -3,6 +3,7 @@ pipeline {
         docker {
             // org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile
             image 'maven:3.8.1-jdk-11-slim'
+            args '-u root' // Run as root to install packages
         }
     }
 
@@ -14,6 +15,12 @@ pipeline {
     }
 
     stages {
+        stage('Prepare Environment') {
+            steps {
+                sh 'apt-get update && apt-get install -y git sshpass'
+            }
+        }
+
         stage('Clone - Build - Generate Docker Images') {
             steps {
                 withCredentials([
