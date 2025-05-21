@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: order-service
-        image: selimhorri/order-service-ecommerce-boot:0.1.0
+        image: ecommerce-microservice-backend-app-order-service-container:latest
         ports:
         - containerPort: 8300
         env:

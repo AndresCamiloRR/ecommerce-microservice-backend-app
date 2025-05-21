@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: proxy-client
-        image: selimhorri/proxy-client-ecommerce-boot:0.1.0
+        image: ecommerce-microservice-backend-app-proxy-client-container:latest
         ports:
         - containerPort: 8900
         env:

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: cloud-config
-        image: leferez/ecommerce-microservice-backend-app-cloud-config-container:latest
+        image: ecommerce-microservice-backend-app-cloud-config-container:latest
         ports:
         - containerPort: 9296
         env:

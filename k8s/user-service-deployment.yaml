@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: selimhorri/user-service-ecommerce-boot:0.1.0
+        image: ecommerce-microservice-backend-app-user-service-container:latest
         ports:
         - containerPort: 8700
         env:

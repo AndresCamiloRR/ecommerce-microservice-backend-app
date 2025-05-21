@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: selimhorri/api-gateway-ecommerce-boot:0.1.0
+        image: ecommerce-microservice-backend-app-api-gateway-container:latest
         ports:
         - containerPort: 8080
         env:
