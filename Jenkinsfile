@@ -50,12 +50,49 @@ pipeline {
       }
     }
 
-    stage('Desplegar manifiestos') {
+    stage('Deploy Core Services') {
       steps {
-        sh '''
-          echo "Desplegando recursos de Kubernetes..."
+        sh """
+          echo "Deploying Core Services..."
+          echo "Deploying Zipkin..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/zipkin-deployment.yaml
-        '''
+          kubectl wait --for=condition=ready pod -l app=zipkin --timeout=120s
+
+          echo "Deploying Service Discovery..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/service-discovery-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=200s
+
+          echo "Deploying Cloud Config..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/cloud-config-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=200s
+        """
+      }
+    }
+
+    stage('Deploy Remaining Services') {
+      steps {
+        script {
+          def remainingServices = [
+            'api-gateway-deployment.yaml',
+            'favourite-service-deployment.yaml',
+            'order-service-deployment.yaml',
+            'payment-service-deployment.yaml',
+            'product-service-deployment.yaml',
+            'proxy-client-deployment.yaml',
+            'shipping-service-deployment.yaml',
+            'user-service-deployment.yaml'
+          ]
+
+          sh "echo Deploying Remaining Services..."
+          for (serviceManifest in remainingServices) {
+            sh "kubectl apply -f ${K8S_MANIFESTS_DIR}/${serviceManifest}"
+            // Optional: Add individual waits here if needed, e.g.:
+            // def appName = serviceManifest.split('-deployment.yaml')[0]
+            // sh "kubectl wait --for=condition=ready pod -l app=${appName} --timeout=180s"
+          }
+          sh "echo All services have been applied. Monitoring pod status..."
+          sh "kubectl get pods -w"
+        }
       }
     }
   }

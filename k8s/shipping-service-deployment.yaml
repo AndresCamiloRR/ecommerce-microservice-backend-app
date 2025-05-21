@@ -32,7 +32,7 @@ spec:
           value: "shipping-service"
         readinessProbe:
           httpGet:
-            path: /actuator/health
+            path: /shipping-service/actuator/health
             port: 8600
           initialDelaySeconds: 60
           periodSeconds: 15
@@ -40,7 +40,7 @@ spec:
           failureThreshold: 6
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /shipping-service/actuator/health
             port: 8600
           initialDelaySeconds: 120
           periodSeconds: 30

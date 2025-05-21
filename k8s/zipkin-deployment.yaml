@@ -21,18 +21,18 @@ spec:
         - containerPort: 9411
         readinessProbe:
           httpGet:
-            path: /zipkin/health # Zipkin health endpoint
+            path: /health
             port: 9411
-          initialDelaySeconds: 10  # Espera 10s antes de la primera sonda
-          periodSeconds: 10        # Sondea cada 10s
-          failureThreshold: 3      # Considera fallido después de 3 intentos
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
         livenessProbe:
           httpGet:
-            path: /zipkin/health # Zipkin health endpoint
+            path: /health
             port: 9411
-          initialDelaySeconds: 30  # Espera 30s antes de la primera sonda
-          periodSeconds: 15        # Sondea cada 15s
-          failureThreshold: 3      # Considera fallido después de 3 intentos
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service

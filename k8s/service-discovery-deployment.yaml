@@ -30,14 +30,14 @@ spec:
           httpGet:
             path: /actuator/health # Eureka health endpoint
             port: 8761
-          initialDelaySeconds: 20  # Espera 20s antes de la primera sonda
-          periodSeconds: 10        # Sondea cada 10s
-          failureThreshold: 3      # Considera fallido después de 3 intentos
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /actuator/health # Eureka health endpoint
             port: 8761
-          initialDelaySeconds: 45  # Espera 45s antes de la primera sonda
+          initialDelaySeconds: 45
           periodSeconds: 15        # Sondea cada 15s
           failureThreshold: 3      # Considera fallido después de 3 intentos
 ---
