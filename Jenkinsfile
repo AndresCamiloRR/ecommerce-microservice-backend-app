@@ -41,6 +41,8 @@ pipeline {
     stage('Obtener credenciales AKS') {
       steps {
         sh '''
+          echo "Instalando kubectl..."
+          az aks install-cli
           echo "Obteniendo credenciales del clúster..."
           az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
           kubectl config current-context
