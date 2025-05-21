@@ -41,9 +41,9 @@ pipeline {
                                 echo Cloning repository... && \
                                 git clone https://github.com/AndresCamiloRR/ecommerce-microservice-backend-app.git && \
                                 cd ecommerce-microservice-backend-app && \
-                                echo Repository cloned!; \
-                            fi && \
-                            ./mvnw -X \\clean package -DskipTests && \
+                                echo Repository cloned!; \\
+                            fi && \\
+                            command ./mvnw -X clean package -DskipTests && \\
                             echo Project built successfully! && \
                             docker compose build && \
                             echo Docker images generated successfully!
