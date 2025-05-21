@@ -7,8 +7,8 @@ pipeline {
   }
 
   environment {
-    RESOURCE_GROUP = 'rg-taller2-dev'          // Ejemplo: nombre real de tu resource group
-    CLUSTER_NAME = 'aks-taller2-cluster'       // Ejemplo: nombre real de tu clúster AKS
+    RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
+    CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
 }
