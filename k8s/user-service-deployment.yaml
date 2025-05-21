@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: ecommerce-microservice-backend-app-user-service-container:latest
+        image: leferez/user-service:latest
         ports:
         - containerPort: 8700
         env:

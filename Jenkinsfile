@@ -21,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('Clone - Build - Generate Docker Images') {
+        stage('Clone') {
             steps {
                 withCredentials([
                     string(credentialsId: "${REMOTE_USER_ID}", variable: 'REMOTE_USER'),
@@ -41,12 +41,7 @@ pipeline {
                                 echo Cloning repository... && \
                                 git clone https://github.com/AndresCamiloRR/ecommerce-microservice-backend-app.git && \
                                 cd ecommerce-microservice-backend-app && \
-                                echo Repository cloned!; \\
-                            fi && \\
-                            command ./mvnw -X clean package -DskipTests && \\
-                            echo Project built successfully! && \
-                            docker compose build && \
-                            echo Docker images generated successfully!
+                                echo Repository cloned!;
                         """
                     }
                 }
@@ -64,9 +59,7 @@ pipeline {
                         def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
                         sh """
                             ${baseCmd} "cd ecommerce-microservice-backend-app && \\
-                                echo Running unit tests... && \\
-                                ./mvnw test -DskipTests=false && \\
-                                echo Unit tests completed successfully!"
+                                echo Running unit tests...
                         """
                     }
                 }

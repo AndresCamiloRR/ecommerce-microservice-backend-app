@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: product-service
-        image: ecommerce-microservice-backend-app-product-service-container:latest
+        image: leferez/product-service:latest
         ports:
         - containerPort: 8500
         env:

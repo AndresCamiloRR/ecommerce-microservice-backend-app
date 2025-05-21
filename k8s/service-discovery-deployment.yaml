@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: service-discovery
-        image: selimhorri/service-discovery-ecommerce-boot:0.1.0
+        image: leferez/service-discovery:latest
         ports:
         - containerPort: 8761
         env:

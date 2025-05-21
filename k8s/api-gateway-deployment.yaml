@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: ecommerce-microservice-backend-app-api-gateway-container:latest
+        image: leferez/api-gateway:latest
         ports:
         - containerPort: 8080
         env:

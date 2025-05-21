@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: proxy-client
-        image: ecommerce-microservice-backend-app-proxy-client-container:latest
+        image: leferez/proxy-client:latest
         ports:
         - containerPort: 8900
         env:
