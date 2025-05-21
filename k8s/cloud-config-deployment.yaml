@@ -21,11 +21,15 @@ spec:
         - containerPort: 9296
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "dev"
+          value: "${PROFILE}"
         - name: SPRING_ZIPKIN_BASE_URL
           value: "http://zipkin:9411"
         - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           value: "http://service-discovery:8761/eureka/"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://service-discovery:8761/eureka/"
+        - name: EUREKA_INSTANCE
+          value: "cloud-config"
         readinessProbe:
           httpGet:
             path: /actuator/health

@@ -21,13 +21,15 @@ spec:
         - containerPort: 8080
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "dev"
+          value: "${PROFILE}"
         - name: SPRING_ZIPKIN_BASE_URL
           value: "http://zipkin:9411"
         - name: SPRING_CONFIG_IMPORT
           value: "optional:configserver:http://cloud-config:9296"
         - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           value: "http://service-discovery:8761/eureka/"
+        - name: EUREKA_INSTANCE
+          value: "api-gateway"
         readinessProbe:
           httpGet:
             path: /actuator/health # Spring Boot Actuator health endpoint
@@ -55,4 +57,5 @@ spec:
   ports:
   - port: 8080
     targetPort: 8080
-  type: LoadBalancer # Tipo LoadBalancer para acceso externo
+    nodePort: 30080 # Puerto específico para acceso desde localhost
+  type: NodePort # Cambiado de LoadBalancer a NodePort

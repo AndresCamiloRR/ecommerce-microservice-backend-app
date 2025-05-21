@@ -21,9 +21,11 @@ spec:
         - containerPort: 8761
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "dev"
+          value: "${PROFILE}"
         - name: SPRING_ZIPKIN_BASE_URL
           value: "http://zipkin:9411"
+        - name: EUREKA_INSTANCE
+          value: "service-discovery"
         readinessProbe:
           httpGet:
             path: /actuator/health # Eureka health endpoint
