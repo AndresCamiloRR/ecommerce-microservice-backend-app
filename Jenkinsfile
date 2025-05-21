@@ -43,8 +43,7 @@ pipeline {
                     ]) {
                     script {
                         def baseCmd = "sshpass -p \"${SSH_PASSWORD}\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
-                        sh "${baseCmd} 'cd ecommerce-microservice-backend-app && echo Running unit tests... && \\
-                            .\\mvnw test -DskipTests=false && echo Unit tests completed successfully!'"
+                        sh "${baseCmd} 'cd ecommerce-microservice-backend-app && echo Running unit tests... && .\\mvnw test -DskipTests=false && echo Unit tests completed successfully!'"
                     }
                 }
             }
