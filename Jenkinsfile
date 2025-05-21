@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            // org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile
+            image 'maven:3.8.1-jdk-11-slim'
+        }
+    }
 
     environment {
         REMOTE_USER_ID          = 'ssh-username'
