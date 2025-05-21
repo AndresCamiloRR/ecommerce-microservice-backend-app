@@ -2,7 +2,6 @@ pipeline {
     agent {
         docker {
             image 'maven:3.8.5-openjdk-11'
-            args '-v /root/.m2:/root/.m2' // Montar el directorio .m2 para evitar problemas de caché
         }
     }
 
@@ -14,12 +13,6 @@ pipeline {
     }
 
     stages {
-        stage('Prepare Environment') {
-            steps {
-                sh 'apt-get update && apt-get install -y sshpass' // Instalar sshpass en el contenedor
-            }
-        }
-
         stage('Clone - Build - Generate Docker Images') {
             steps {
                 withCredentials([
@@ -42,7 +35,7 @@ pipeline {
                                 cd ecommerce-microservice-backend-app && \
                                 echo Repository cloned!; \
                             fi && \
-                            ./mvnw clean package -DskipTests && \
+                            ./mvnw -X clean package -DskipTests && \
                             echo Project built successfully! && \
                             docker compose build && \
                             echo Docker images generated successfully!
