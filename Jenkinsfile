@@ -35,6 +35,9 @@ pipeline {
                                 cd ecommerce-microservice-backend-app && \
                                 echo Repository cloned!; \
                             fi && \
+                            chmod +x ./mvnw && \
+                            echo Current directory: $(pwd) && \
+                            ls -la && \
                             ./mvnw -X clean package -DskipTests && \
                             echo Project built successfully! && \
                             docker compose build && \
