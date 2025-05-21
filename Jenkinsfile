@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.5-openjdk-11'
-        }
-    }
+    agent any
 
     environment {
         REMOTE_USER_ID          = 'ssh-username'
@@ -22,7 +18,7 @@ pipeline {
                     string(credentialsId: "${PROFILE_CREDENTIAL_ID}", variable: 'PROFILE')
                 ]) {
                     script {
-                        def baseCmd = "sshpass -p '\${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no \${REMOTE_USER}@\${REMOTE_HOST} bash -c"
+                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
 
                         sh """
                             if [ -d "ecommerce-microservice-backend-app" ]; then \
@@ -35,10 +31,7 @@ pipeline {
                                 cd ecommerce-microservice-backend-app && \
                                 echo Repository cloned!; \
                             fi && \
-                            chmod +x ./mvnw && \
-                            echo Current directory: \$(pwd) && \
-                            ls -la && \
-                            ./mvnw -X clean package -DskipTests && \
+                            ./mvnw clean package -DskipTests && \
                             echo Project built successfully! && \
                             docker compose build && \
                             echo Docker images generated successfully!
@@ -56,7 +49,7 @@ pipeline {
                     string(credentialsId: "${SSH_PASSWORD_ID}", variable: 'SSH_PASSWORD')
                 ]) {
                     script {
-                        def baseCmd = "sshpass -p '\${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no \${REMOTE_USER}@\${REMOTE_HOST} bash -c"
+                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
                         sh """
                             ${baseCmd} "cd ecommerce-microservice-backend-app && \\
                                 echo Running unit tests... && \\
@@ -77,7 +70,7 @@ pipeline {
                     string(credentialsId: "${PROFILE_CREDENTIAL_ID}", variable: 'PROFILE')
                 ]) {
                     script {
-                        def baseCmd = "sshpass -p '\${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no \${REMOTE_USER}@\${REMOTE_HOST} bash -c"
+                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
 
                         sh "${baseCmd} 'echo Starting deployment of core services for profile: ${PROFILE}...'"
 
@@ -104,7 +97,7 @@ pipeline {
                     string(credentialsId: "${PROFILE_CREDENTIAL_ID}", variable: 'PROFILE')
                 ]) {
                     script {
-                        def baseCmd = "sshpass -p '\${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no \${REMOTE_USER}@\${REMOTE_HOST} bash -c"
+                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
                         def k8sDir = "ecommerce-microservice-backend-app/k8s"
                         def services = [
                             'api-gateway-deployment.yaml',
@@ -152,7 +145,7 @@ pipeline {
                 string(credentialsId: "${SSH_PASSWORD_ID}", variable: 'SSH_PASSWORD')
             ]) {
                 script {
-                    def baseCmd = "sshpass -p '\${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no \${REMOTE_USER}@\${REMOTE_HOST}"
+                    def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST}"
                     sh "${baseCmd} 'echo Destroying minikube... && minikube delete --all --purge'"
                 }
             }
