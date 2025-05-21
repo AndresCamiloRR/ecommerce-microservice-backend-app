@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.8.5-openjdk-11'
+        }
+    }
 
     environment {
         REMOTE_USER_ID          = 'ssh-username'
