@@ -1,163 +1,60 @@
 pipeline {
-    agent {
-        docker {
-            // org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile
-            image 'maven:3.8.1-jdk-11-slim'
-            args '-u root' // Run as root to install packages
-        }
+  agent {
+    docker {
+      image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
+      args '-u 0:0'
+    }
+  }
+
+  environment {
+    RESOURCE_GROUP = 'rg-taller2-dev'          // Ejemplo: nombre real de tu resource group
+    CLUSTER_NAME = 'aks-taller2-cluster'       // Ejemplo: nombre real de tu clúster AKS
+    K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
+    AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
+}
+
+  stages {
+    stage('Checkout código') {
+      steps {
+        checkout scm
+      }
     }
 
-    environment {
-        REMOTE_USER_ID          = 'ssh-username'
-        REMOTE_HOST_ID          = 'ssh-hostname'
-        SSH_PASSWORD_ID         = 'ssh-password'
-        PROFILE_CREDENTIAL_ID   = 'profile'
+    stage('Login Azure') {
+      steps {
+        withCredentials([azureServicePrincipal(
+          credentialsId: env.AZURE_CREDENTIALS_ID,
+          subscriptionIdVariable: 'AZ_SUBSCRIPTION_ID',
+          clientIdVariable: 'AZ_CLIENT_ID',
+          clientSecretVariable: 'AZ_CLIENT_SECRET',
+          tenantIdVariable: 'AZ_TENANT_ID'
+        )]) {
+          sh '''
+            echo "Iniciando sesión en Azure..."
+            az login --service-principal -u $AZ_CLIENT_ID -p $AZ_CLIENT_SECRET --tenant $AZ_TENANT_ID
+            az account set --subscription $AZ_SUBSCRIPTION_ID
+          '''
+        }
+      }
     }
 
-    stages {
-        stage('Prepare Environment') {
-            steps {
-                sh 'apt-get update && apt-get install -y git sshpass'
-            }
-        }
-
-        stage('Clone') {
-            steps {
-                withCredentials([
-                    string(credentialsId: "${REMOTE_USER_ID}", variable: 'REMOTE_USER'),
-                    string(credentialsId: "${REMOTE_HOST_ID}", variable: 'REMOTE_HOST'),
-                    string(credentialsId: "${SSH_PASSWORD_ID}", variable: 'SSH_PASSWORD'),
-                    string(credentialsId: "${PROFILE_CREDENTIAL_ID}", variable: 'PROFILE')
-                ]) {
-                    script {
-                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
-
-                        sh """
-                            if [ -d "ecommerce-microservice-backend-app" ]; then \
-                                echo Repository already exists! && \
-                                cd ecommerce-microservice-backend-app && \
-                                git pull; \
-                            else \
-                                echo Cloning repository... && \
-                                git clone https://github.com/AndresCamiloRR/ecommerce-microservice-backend-app.git && \
-                                cd ecommerce-microservice-backend-app && \
-                                echo Repository cloned!;
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Unit Tests') {
-            steps {
-                withCredentials([
-                    string(credentialsId: "${REMOTE_USER_ID}", variable: 'REMOTE_USER'),
-                    string(credentialsId: "${REMOTE_HOST_ID}", variable: 'REMOTE_HOST'),
-                    string(credentialsId: "${SSH_PASSWORD_ID}", variable: 'SSH_PASSWORD')
-                ]) {
-                    script {
-                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
-                        sh """
-                            ${baseCmd} "cd ecommerce-microservice-backend-app && \\
-                                echo Running unit tests...
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Deploy Core Services') {
-            steps {
-                withCredentials([
-                    string(credentialsId: "${REMOTE_USER_ID}", variable: 'REMOTE_USER'),
-                    string(credentialsId: "${REMOTE_HOST_ID}", variable: 'REMOTE_HOST'),
-                    string(credentialsId: "${SSH_PASSWORD_ID}", variable: 'SSH_PASSWORD'),
-                    string(credentialsId: "${PROFILE_CREDENTIAL_ID}", variable: 'PROFILE')
-                ]) {
-                    script {
-                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
-
-                        sh "${baseCmd} 'echo Starting deployment of core services for profile: ${PROFILE}...'"
-
-                        sh "${baseCmd} 'minikube start --cpus=2 --memory=4096'"
-
-                        def k8sDir = "ecommerce-microservice-backend-app/k8s"
-
-                        sh "${baseCmd} 'cd ${k8sDir} && echo Deploying Zipkin... && kubectl apply -f zipkin-deployment.yaml && kubectl wait --for=condition=ready pod -l app=zipkin --timeout=60s'"
-
-                        sh "${baseCmd} 'cd ${k8sDir} && export PROFILE=${PROFILE} && envsubst < service-discovery-deployment.yaml | kubectl apply -f - && kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=200s'"
-
-                        sh "${baseCmd} 'cd ${k8sDir} && export PROFILE=${PROFILE} && envsubst < cloud-config-deployment.yaml | kubectl apply -f - && kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=200s'"
-                    }
-                }
-            }
-        }
-
-        stage('Deploy Remaining Services') {
-            steps {
-                withCredentials([
-                    string(credentialsId: "${REMOTE_USER_ID}", variable: 'REMOTE_USER'),
-                    string(credentialsId: "${REMOTE_HOST_ID}", variable: 'REMOTE_HOST'),
-                    string(credentialsId: "${SSH_PASSWORD_ID}", variable: 'SSH_PASSWORD'),
-                    string(credentialsId: "${PROFILE_CREDENTIAL_ID}", variable: 'PROFILE')
-                ]) {
-                    script {
-                        def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
-                        def k8sDir = "ecommerce-microservice-backend-app/k8s"
-                        def services = [
-                            'api-gateway-deployment.yaml',
-                            'favourite-service-deployment.yaml',
-                            'order-service-deployment.yaml',
-                            'payment-service-deployment.yaml',
-                            'product-service-deployment.yaml',
-                            'proxy-client-deployment.yaml',
-                            'shipping-service-deployment.yaml',
-                            'user-service-deployment.yaml'
-                        ]
-
-                        sh "${baseCmd} 'echo Core services are now ready. Deploying remaining services for profile: ${PROFILE}... && cd ${k8sDir}'"
-
-                        for (svc in services) {
-                            sh "${baseCmd} 'cd ${k8sDir} && export PROFILE=${PROFILE} && envsubst < ${svc} | kubectl apply -f -'"
-                        }
-
-                        sh "${baseCmd} 'echo All services have been deployed for profile: ${PROFILE}! && kubectl get pods -w'"
-                    }
-                }
-            }
-        }
-
-        stage('Integration, E2E and Stress Tests') {
-            steps {
-                script {
-                    if (env.PROFILE != 'dev') {
-                        echo "Running tests for profile: ${env.PROFILE}..."
-                        // Aquí puedes insertar ejecución de pruebas reales
-                    } else {
-                        echo "Skipping tests for profile: ${env.PROFILE}..."
-                    }
-                }
-            }
-        }
+    stage('Obtener credenciales AKS') {
+      steps {
+        sh '''
+          echo "Obteniendo credenciales del clúster..."
+          az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
+          kubectl config current-context
+        '''
+      }
     }
 
-    post {
-        failure {
-            echo 'Deployment failed. Check console output for errors.'
-            withCredentials([
-                string(credentialsId: "${REMOTE_USER_ID}", variable: 'REMOTE_USER'),
-                string(credentialsId: "${REMOTE_HOST_ID}", variable: 'REMOTE_HOST'),
-                string(credentialsId: "${SSH_PASSWORD_ID}", variable: 'SSH_PASSWORD')
-            ]) {
-                script {
-                    def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST}"
-                    sh "${baseCmd} 'echo Destroying minikube... && minikube delete --all --purge'"
-                }
-            }
-        }
-
-        success {
-            echo 'Deployment completed successfully.'
-        }
+    stage('Desplegar manifiestos') {
+      steps {
+        sh '''
+          echo "Desplegando recursos de Kubernetes..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/zipkin-deployment.yaml
+        '''
+      }
     }
+  }
 }
