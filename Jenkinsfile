@@ -21,21 +21,21 @@ pipeline {
                         def baseCmd = "sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} bash -c"
 
                         sh """
-                            ${baseCmd} "if [ -d \\"ecommerce-microservice-backend-app\\" ]; then \\
-                                echo Repository already exists! && \\
-                                cd ecommerce-microservice-backend-app && \\
-                                git pull; \\
-                            else \\
-                                echo Cloning repository... && \\
-                                git clone https://github.com/AndresCamiloRR/ecommerce-microservice-backend-app.git && \\
-                                cd ecommerce-microservice-backend-app && \\
-                                echo Repository cloned!; \\
-                            fi && \\
-                            cd ecommerce-microservice-backend-app && \\
-                            ./mvnw clean package -DskipTests && \\
-                            echo Project built successfully! && \\
-                            docker compose build && \\
-                            echo Docker images generated successfully!"
+                            if [ -d "ecommerce-microservice-backend-app" ]; then \
+                                echo Repository already exists! && \
+                                cd ecommerce-microservice-backend-app && \
+                                git pull; \
+                            else \
+                                echo Cloning repository... && \
+                                git clone https://github.com/AndresCamiloRR/ecommerce-microservice-backend-app.git && \
+                                cd ecommerce-microservice-backend-app && \
+                                echo Repository cloned!; \
+                            fi && \
+                            cd ecommerce-microservice-backend-app && \
+                            ./mvnw clean package -DskipTests && \
+                            echo Project built successfully! && \
+                            docker compose build && \
+                            echo Docker images generated successfully!
                         """
                     }
                 }
