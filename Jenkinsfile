@@ -21,13 +21,12 @@ pipeline {
                         string(credentialsId: env.PROFILE_CREDENTIAL_ID, variable: 'PROFILE')
                     ]) {
                     script {
-                        def baseCmd = "sshpass -p \\"${SSH_PASSWORD}\\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
+                        def baseCmd = "sshpass -p \"${SSH_PASSWORD}\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
                         // Verificar si el directorio ya existe, si exite pull si no existe clone
                         sh "${baseCmd} 'if [ -d \"ecommerce-microservice-backend-app\" ]; then echo Repository already exists! && cd ecommerce-microservice-backend-app && git pull; else echo Cloning repository... && git clone https://github.com/AndresCamiloRR/ecommerce-microservice-backend-app.git && cd ecommerce-microservice-backend-app && echo Repository cloned!; fi'"
 
                         // Buildear y generar las imágenes de Docker
-                        sh "${baseCmd} '.\\mvnw clean package -DskipTests && echo Project built successfully!
-                            && docker compose build && echo Docker images generated successfully!'"
+                        sh "${baseCmd} '.\\mvnw clean package -DskipTests && echo Project built successfully! && docker compose build && echo Docker images generated successfully!'"
                     }
                 }
             }
@@ -36,13 +35,14 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 // Obtener credenciales de Jenkins
+                // Obtener credenciales de Jenkins
                 withCredentials([
                         string(credentialsId: env.REMOTE_USER_ID,     variable: 'REMOTE_USER'),
                         string(credentialsId: env.REMOTE_HOST_ID,     variable: 'REMOTE_HOST'),
                         string(credentialsId: env.SSH_PASSWORD_ID,    variable: 'SSH_PASSWORD')
                     ]) {
                     script {
-                        def baseCmd = "sshpass -p \\"${SSH_PASSWORD}\\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
+                        def baseCmd = "sshpass -p \"${SSH_PASSWORD}\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
                         sh "${baseCmd} 'cd ecommerce-microservice-backend-app
                             && echo Running unit tests... && \\
                             .\\mvnw test -DskipTests=false && echo Unit tests completed successfully!'"
@@ -62,7 +62,7 @@ pipeline {
                     ]) {
                     script {
                         //  Definir el comando base para SSH
-                        def baseCmd = "sshpass -p \\"${SSH_PASSWORD}\\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
+                        def baseCmd = "sshpass -p \"${SSH_PASSWORD}\" ssh -o StrictHostKeyChecking=no ${env.REMOTE_USER}@${env.REMOTE_HOST}"
                         sh "${baseCmd} 'echo Starting deployment of core services for profile: ${PROFILE}...'"
 
                         // Montar minikube
