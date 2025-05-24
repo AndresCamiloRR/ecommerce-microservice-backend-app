@@ -21,7 +21,7 @@ spec:
         - containerPort: 9296
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "${PROFILE}"
+          value: "dev"
         - name: SPRING_ZIPKIN_BASE_URL
           value: "http://zipkin:9411"
         - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE

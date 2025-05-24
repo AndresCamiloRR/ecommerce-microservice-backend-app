@@ -21,7 +21,7 @@ spec:
         - containerPort: 8080
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "${PROFILE}"
+          value: "dev"
         - name: SPRING_ZIPKIN_BASE_URL
           value: "http://zipkin:9411"
         - name: SPRING_CONFIG_IMPORT
@@ -57,5 +57,4 @@ spec:
   ports:
   - port: 8080
     targetPort: 8080
-    nodePort: 30080 # Puerto específico para acceso desde localhost
-  type: NodePort # Cambiado de LoadBalancer a NodePort
+  type: LoadBalancer

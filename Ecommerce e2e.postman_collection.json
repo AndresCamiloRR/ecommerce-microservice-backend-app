@@ -1,0 +1,1738 @@
+{
+	"info": {
+		"_postman_id": "c14f6791-1302-4e86-9ef9-251344b6e318",
+		"name": "Ecommerce e2e",
+		"description": "Pruebas E2E realizadas con postman y newman",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34458513"
+	},
+	"item": [
+		{
+			"name": "Create an user, credential, category and multiple products",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdUserResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " { \r\n    \"userId\": \"{{$randomInt}}\", \r\n    \"firstName\": \"Alejandro\", \r\n    \"lastName\": \"Cordoba\", \r\n    \"imageUrl\": \"{{$randomUrl}}\", \r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"phone\": \"{{$randomPhoneNumber}}\",\r\n    \"addressDtos\": [\r\n        {\r\n            \"fullAddress\": \"123 Main St\", \r\n            \"postalCode\": \"12345\", \r\n            \"city\": \"New York\"\r\n        }\r\n    ], \r\n    \"credential\": { \r\n        \"username\": \"johndoe\", \r\n        \"password\": \"securePassword123\", \r\n        \"roleBasedAuthority\": \"ROLE_USER\", \r\n        \"isEnabled\": true, \r\n        \"isAccountNonExpired\": true, \r\n        \"isAccountNonLocked\": true, \r\n        \"isCredentialsNonExpired\": true \r\n    }\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}user-service/api/users",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}user-service"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Credential",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let user = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"\r",
+									"// Datos del usuario\r",
+									"pm.environment.set(\"userId\", user.userId);\r",
+									"pm.environment.set(\"firstName\", user.firstName);\r",
+									"pm.environment.set(\"lastName\", user.lastName);\r",
+									"pm.environment.set(\"imageUrl\", user.imageUrl);\r",
+									"pm.environment.set(\"email\", user.email);\r",
+									"pm.environment.set(\"phone\", user.phone);\r",
+									"\r",
+									"// Datos de la credencial\r",
+									"pm.environment.set(\"credentialId\", user.credential.credentialId);\r",
+									"pm.environment.set(\"username\", user.credential.username);\r",
+									"pm.environment.set(\"password\", user.credential.password);\r",
+									"pm.environment.set(\"roleBasedAuthority\", user.credential.roleBasedAuthority);\r",
+									"pm.environment.set(\"isEnabled\", user.credential.isEnabled);\r",
+									"pm.environment.set(\"isAccountNonExpired\", user.credential.isAccountNonExpired);\r",
+									"pm.environment.set(\"isAccountNonLocked\", user.credential.isAccountNonLocked);\r",
+									"pm.environment.set(\"isCredentialsNonExpired\", user.credential.isCredentialsNonExpired);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdCredentialResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"credentialId\": {{credentialId}},\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"roleBasedAuthority\": \"{{roleBasedAuthority}}\",\r\n    \"isEnabled\": {{isEnabled}},\r\n    \"isAccountNonExpired\": {{isAccountNonExpired}},\r\n    \"isAccountNonLocked\": {{isAccountNonLocked}},\r\n    \"isCredentialsNonExpired\": {{isCredentialsNonExpired}},\r\n    \"user\": {\r\n        \"userId\": {{userId}},\r\n        \"firstName\": \"{{firstName}}\",\r\n        \"lastName\": \"{{lastName}}\",\r\n        \"imageUrl\": \"{{imageUrl}}\",\r\n        \"email\": \"{{email}}\",\r\n        \"phone\": \"{{phone}}\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}user-service/api/credentials",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}user-service"
+							],
+							"path": [
+								"api",
+								"credentials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdCategoryResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"categoryId\": \"{{$randomInt}}\", \r\n    \"categoryTitle\": \"Gaming Computer\",\r\n    \"imageUrl\": \"{{$randomUrl}}\",\r\n    \"parentCategory\": {\r\n        \"categoryId\": 1,\r\n        \"categoryTitle\": \"Computer\",\r\n        \"imageUrl\": null\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}product-service/api/categories",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}product-service"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdProductResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " { \r\n    \"productId\": \"{{$randomInt}}\", \r\n    \"productTitle\": \"lenovo legion\", \r\n    \"imageUrl\": \"{{$randomUrl}}\", \r\n    \"sku\": \"{{$randomAlphaNumeric}}\",\r\n    \"priceUnit\": {{$randomPrice}},\r\n    \"quantity\": {{$randomInt}},\r\n    \"category\": {{createdCategoryResponse}}\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}product-service/api/products",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}product-service"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdProduct2Response\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " { \r\n    \"productId\": \"{{$randomInt}}\", \r\n    \"productTitle\": \"hp omen\", \r\n    \"imageUrl\": \"{{$randomUrl}}\", \r\n    \"sku\": \"{{$randomAlphaNumeric}}\",\r\n    \"priceUnit\": {{$randomPrice}},\r\n    \"quantity\": {{$randomInt}},\r\n    \"category\": {{createdCategoryResponse}}\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}product-service/api/products",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}product-service"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdProduct3Response\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " { \r\n    \"productId\": \"{{$randomInt}}\", \r\n    \"productTitle\": \"hp victus\", \r\n    \"imageUrl\": \"{{$randomUrl}}\", \r\n    \"sku\": \"{{$randomAlphaNumeric}}\",\r\n    \"priceUnit\": {{$randomPrice}},\r\n    \"quantity\": {{$randomInt}},\r\n    \"category\": {{createdCategoryResponse}}\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}product-service/api/products",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}product-service"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"userId\", userJson.userId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}user-service/api/users/{{userId}}",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}user-service"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{prefix}}product-service/api/products",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}product-service"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Vamos a crear un usuario y una creedencial ya que sin una creedencial no podemos hacer un findAll por la reelación bidireccional entre servicios. Además crearemos 3 productos, validando que hayan sido creados junto con el usuario"
+		},
+		{
+			"name": "Make a payment",
+			"item": [
+				{
+					"name": "Create Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdCartResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"userId\", userJson.userId);\r",
+									"pm.environment.set(\"firstName\", userJson.firstName);\r",
+									"pm.environment.set(\"lastName\", userJson.lastName);\r",
+									"pm.environment.set(\"imageUrl\", userJson.imageUrl);\r",
+									"pm.environment.set(\"email\", userJson.email);\r",
+									"pm.environment.set(\"phone\", userJson.phone);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cartId\": {{$randomInt}},\r\n    \"userId\": {{userId}},\r\n    \"user\": {\r\n        \"userId\": {{userId}},\r\n        \"firstName\": \"{{firstName}}\",\r\n        \"lastName\": \"{{lastName}}\",\r\n        \"imageUrl\": \"{{imageUrl}}\",\r\n        \"email\": \"{{email}}\",\r\n        \"phone\": \"{{phone}}\"\r\n    }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}order-service/api/carts",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}order-service"
+							],
+							"path": [
+								"api",
+								"carts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"let cartJson = JSON.parse(pm.collectionVariables.get(\"createdCartResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"userId\", userJson.userId);\r",
+									"pm.environment.set(\"cartId\", cartJson.cartId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdOrderResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orderId\": {{$randomInt}},\r\n    \"orderDate\": \"23-05-2025__02:05:55:547092\",\r\n    \"orderDesc\": \"{{$randomLoremWord}}\",\r\n    \"orderFee\": {{$randomPrice}},\r\n    \"cart\": {\r\n        \"cartId\": {{cartId}},\r\n        \"userId\": {{userId}}\r\n    }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}order-service/api/orders",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}order-service"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// 1. Valor booleano aleatorio\r",
+									"let isPayed = Math.random() < 0.5; // true o false\r",
+									"\r",
+									"// 2. Selección condicional del status\r",
+									"let status = \"\";\r",
+									"\r",
+									"if (isPayed) {\r",
+									"    // Si pagado, solo puede ser COMPLETED\r",
+									"    status = \"COMPLETED\";\r",
+									"} else {\r",
+									"    // Si no está pagado, elegir aleatoriamente entre NOT_STARTED o IN_PROGRESS\r",
+									"    let options = [\"NOT_STARTED\", \"IN_PROGRESS\"];\r",
+									"    status = options[Math.floor(Math.random() * options.length)];\r",
+									"}\r",
+									"\r",
+									"// 3. Guardar ambos como variables de entorno o colección\r",
+									"pm.environment.set(\"isPayed\", isPayed);\r",
+									"pm.environment.set(\"paymentStatus\", status);\r",
+									"\r",
+									"let orderJson = JSON.parse(pm.collectionVariables.get(\"createdOrderResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"orderId\", orderJson.orderId);\r",
+									"pm.environment.set(\"orderDate\", orderJson.orderDate);\r",
+									"pm.environment.set(\"orderDesc\", orderJson.orderDesc);\r",
+									"pm.environment.set(\"orderFee\", orderJson.orderFee);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdPaymentResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"paymentId\": {{$randomInt}},\r\n    \"isPayed\": {{isPayed}},\r\n    \"paymentStatus\": \"{{paymentStatus}}\",\r\n    \"order\": {\r\n        \"orderId\": {{orderId}},\r\n        \"orderDate\": \"{{orderDate}}\",\r\n        \"orderDesc\": \"{{orderDesc}}\",\r\n        \"orderFee\": {{orderFee}}\r\n    }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}payment-service/api/payments",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}payment-service"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Payment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let paymentJson = JSON.parse(pm.collectionVariables.get(\"createdPaymentResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"paymentId\", paymentJson.paymentId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{prefix}}payment-service/api/payments/{{paymentId}}",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}payment-service"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{paymentId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Retomando nuestro usuario creado le vamos a crear un carrito, con ese carrito vamos a crear una orden y con una orden vamos a generar un pago, revisando que el pago haya sido adecuadamente creado"
+		},
+		{
+			"name": "Create, update and delete shipping",
+			"item": [
+				{
+					"name": "Create Shipping",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Obtener las variables de producto y orden\r",
+									"const product = JSON.parse(pm.collectionVariables.get(\"createdProductResponse\"));\r",
+									"const order = JSON.parse(pm.collectionVariables.get(\"createdOrderResponse\"));\r",
+									"\r",
+									"// Construir el objeto shipping\r",
+									"const shippingPayload = {\r",
+									"    productId: product.productId,\r",
+									"    orderId: order.orderId,\r",
+									"    orderedQuantity: 2, // puedes cambiar esta cantidad si es necesario\r",
+									"    product: {\r",
+									"        productId: product.productId,\r",
+									"        productTitle: product.productTitle,\r",
+									"        imageUrl: product.imageUrl,\r",
+									"        sku: product.sku,\r",
+									"        priceUnit: product.priceUnit,\r",
+									"        quantity: product.quantity\r",
+									"    },\r",
+									"    order: {\r",
+									"        orderId: order.orderId,\r",
+									"        orderDate: order.orderDate,\r",
+									"        orderDesc: order.orderDesc,\r",
+									"        orderFee: order.orderFee\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"// Guardar el payload como variable temporal para el cuerpo de la solicitud\r",
+									"pm.variables.set(\"shippingPayload\", JSON.stringify(shippingPayload, null, 2));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdShippingResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{shippingPayload}}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}shipping-service/api/shippings",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}shipping-service"
+							],
+							"path": [
+								"api",
+								"shippings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shipping",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const shipping = JSON.parse(pm.collectionVariables.get(\"createdShippingResponse\"));\r",
+									"\r",
+									"shipping.orderedQuantity = 3; \r",
+									"\r",
+									"pm.variables.set(\"updatedShippingPayload\", JSON.stringify(shipping, null, 2));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"updatedShippingResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{updatedShippingPayload}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}shipping-service/api/shippings",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}shipping-service"
+							],
+							"path": [
+								"api",
+								"shippings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Obtener el shipping actualizado\r",
+									"const updatedShipping = JSON.parse(pm.collectionVariables.get(\"createdShippingResponse\"));\r",
+									"\r",
+									"// Obtener la colección de la respuesta\r",
+									"const shippingCollection = pm.response.json().collection;\r",
+									"\r",
+									"// Buscar la entrada con el mismo productId y orderId\r",
+									"const match = shippingCollection.find(s => \r",
+									"    s.productId === updatedShipping.productId &&\r",
+									"    s.orderId === updatedShipping.orderId\r",
+									");\r",
+									"\r",
+									"// Asegurar que existe\r",
+									"pm.test(\"Shipping actualizado encontrado\", function () {\r",
+									"    pm.expect(match).to.not.be.undefined;\r",
+									"});\r",
+									"\r",
+									"// Validar que el orderedQuantity sea igual a 3\r",
+									"pm.test(\"orderedQuantity actualizado correctamente\", function () {\r",
+									"    pm.expect(match.orderedQuantity).to.eql(3);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{prefix}}shipping-service/api/shippings",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}shipping-service"
+							],
+							"path": [
+								"api",
+								"shippings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Payment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const updatedShipping = JSON.parse(pm.collectionVariables.get(\"updatedShippingResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"orderId\", updatedShipping.orderId);\r",
+									"pm.environment.set(\"productId\", updatedShipping.productId);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orderId\": {{orderId}},\r\n    \"productId\": {{productId}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}shipping-service/api/shippings/delete",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}shipping-service"
+							],
+							"path": [
+								"api",
+								"shippings",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Update Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Obtener el shipping previamente creado (antes de ser eliminado)\r",
+									"const deletedShipping = JSON.parse(pm.collectionVariables.get(\"createdShippingResponse\"));\r",
+									"\r",
+									"// Obtener la colección de la respuesta (lista de shippings después del DELETE)\r",
+									"const shippingCollection = pm.response.json().collection;\r",
+									"\r",
+									"// Buscar la entrada que debería haber sido eliminada\r",
+									"const match = shippingCollection.find(s => \r",
+									"    s.productId === deletedShipping.productId &&\r",
+									"    s.orderId === deletedShipping.orderId\r",
+									");\r",
+									"\r",
+									"// Asegurar que ya no exista\r",
+									"pm.test(\"Shipping eliminado correctamente\", function () {\r",
+									"    pm.expect(match).to.be.undefined;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{prefix}}shipping-service/api/shippings",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}shipping-service"
+							],
+							"path": [
+								"api",
+								"shippings"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Vamos a testear todo el CRUD de envios, el cual será creado a partir de la orden creada en el paso anterior y el producto 1 creado en la primera prueba, validando que haya sido actualizada y eliminada"
+		},
+		{
+			"name": "Add multiple fav products and remove one",
+			"item": [
+				{
+					"name": "Add Fav 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Obtener y parsear las variables del entorno\r",
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"let productJson = JSON.parse(pm.collectionVariables.get(\"createdProductResponse\"));\r",
+									"\r",
+									"// Setear las variables necesarias para el body\r",
+									"pm.environment.set(\"userId\", userJson.userId);\r",
+									"pm.environment.set(\"firstName\", userJson.firstName);\r",
+									"pm.environment.set(\"lastName\", userJson.lastName);\r",
+									"pm.environment.set(\"imageUrl\", userJson.imageUrl);\r",
+									"pm.environment.set(\"email\", userJson.email);\r",
+									"pm.environment.set(\"phone\", userJson.phone);\r",
+									"\r",
+									"pm.environment.set(\"productId\", productJson.productId);\r",
+									"pm.environment.set(\"productTitle\", productJson.productTitle);\r",
+									"pm.environment.set(\"productImageUrl\", productJson.imageUrl);\r",
+									"pm.environment.set(\"sku\", productJson.sku);\r",
+									"pm.environment.set(\"priceUnit\", productJson.priceUnit);\r",
+									"pm.environment.set(\"quantity\", productJson.quantity);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdFavResponse\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": {{userId}},\r\n  \"productId\": {{productId}},\r\n  \"likeDate\": \"23-05-2025__22:15:30:360374\",\r\n  \"user\": {\r\n    \"userId\": {{userId}},\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"imageUrl\": \"{{imageUrl}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"phone\": \"{{phone}}\"\r\n  },\r\n  \"product\": {\r\n    \"productId\": {{productId}},\r\n    \"productTitle\": \"{{productTitle}}\",\r\n    \"imageUrl\": \"{{productImageUrl}}\",\r\n    \"sku\": \"{{sku}}\",\r\n    \"priceUnit\": {{priceUnit}},\r\n    \"quantity\": {{quantity}}\r\n  }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}favourite-service/api/favourites",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}favourite-service"
+							],
+							"path": [
+								"api",
+								"favourites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Fav 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Obtener y parsear las variables del entorno\r",
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"let productJson = JSON.parse(pm.collectionVariables.get(\"createdProduct2Response\"));\r",
+									"\r",
+									"// Setear las variables necesarias para el body\r",
+									"pm.environment.set(\"userId\", userJson.userId);\r",
+									"pm.environment.set(\"firstName\", userJson.firstName);\r",
+									"pm.environment.set(\"lastName\", userJson.lastName);\r",
+									"pm.environment.set(\"imageUrl\", userJson.imageUrl);\r",
+									"pm.environment.set(\"email\", userJson.email);\r",
+									"pm.environment.set(\"phone\", userJson.phone);\r",
+									"\r",
+									"pm.environment.set(\"productId\", productJson.productId);\r",
+									"pm.environment.set(\"productTitle\", productJson.productTitle);\r",
+									"pm.environment.set(\"productImageUrl\", productJson.imageUrl);\r",
+									"pm.environment.set(\"sku\", productJson.sku);\r",
+									"pm.environment.set(\"priceUnit\", productJson.priceUnit);\r",
+									"pm.environment.set(\"quantity\", productJson.quantity);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdFavResponse2\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": {{userId}},\r\n  \"productId\": {{productId}},\r\n  \"likeDate\": \"23-05-2025__22:15:30:360374\",\r\n  \"user\": {\r\n    \"userId\": {{userId}},\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"imageUrl\": \"{{imageUrl}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"phone\": \"{{phone}}\"\r\n  },\r\n  \"product\": {\r\n    \"productId\": {{productId}},\r\n    \"productTitle\": \"{{productTitle}}\",\r\n    \"imageUrl\": \"{{productImageUrl}}\",\r\n    \"sku\": \"{{sku}}\",\r\n    \"priceUnit\": {{priceUnit}},\r\n    \"quantity\": {{quantity}}\r\n  }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}favourite-service/api/favourites",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}favourite-service"
+							],
+							"path": [
+								"api",
+								"favourites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Fav 3",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Obtener y parsear las variables del entorno\r",
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"let productJson = JSON.parse(pm.collectionVariables.get(\"createdProduct3Response\"));\r",
+									"\r",
+									"// Setear las variables necesarias para el body\r",
+									"pm.environment.set(\"userId\", userJson.userId);\r",
+									"pm.environment.set(\"firstName\", userJson.firstName);\r",
+									"pm.environment.set(\"lastName\", userJson.lastName);\r",
+									"pm.environment.set(\"imageUrl\", userJson.imageUrl);\r",
+									"pm.environment.set(\"email\", userJson.email);\r",
+									"pm.environment.set(\"phone\", userJson.phone);\r",
+									"\r",
+									"pm.environment.set(\"productId\", productJson.productId);\r",
+									"pm.environment.set(\"productTitle\", productJson.productTitle);\r",
+									"pm.environment.set(\"productImageUrl\", productJson.imageUrl);\r",
+									"pm.environment.set(\"sku\", productJson.sku);\r",
+									"pm.environment.set(\"priceUnit\", productJson.priceUnit);\r",
+									"pm.environment.set(\"quantity\", productJson.quantity);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"createdFavResponse3\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": {{userId}},\r\n  \"productId\": {{productId}},\r\n  \"likeDate\": \"23-05-2025__22:15:30:360374\",\r\n  \"user\": {\r\n    \"userId\": {{userId}},\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"imageUrl\": \"{{imageUrl}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"phone\": \"{{phone}}\"\r\n  },\r\n  \"product\": {\r\n    \"productId\": {{productId}},\r\n    \"productTitle\": \"{{productTitle}}\",\r\n    \"imageUrl\": \"{{productImageUrl}}\",\r\n    \"sku\": \"{{sku}}\",\r\n    \"priceUnit\": {{priceUnit}},\r\n    \"quantity\": {{quantity}}\r\n  }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{prefix}}favourite-service/api/favourites",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}favourite-service"
+							],
+							"path": [
+								"api",
+								"favourites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Size",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User has 3 favs\", function () {\r",
+									"    const jsonResponse = pm.response.json();\r",
+									"    const collection = jsonResponse.collection || [];\r",
+									"\r",
+									"    // Filtra por userId === 5\r",
+									"    const favoritosUsuario = collection.filter(item => item.userId === 5);\r",
+									"\r",
+									"    // Verifica que la longitud sea exactamente 3\r",
+									"    pm.expect(favoritosUsuario.length).to.eql(3);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{prefix}}favourite-service/api/favourites",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}favourite-service"
+							],
+							"path": [
+								"api",
+								"favourites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Fav 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"let productJson = JSON.parse(pm.collectionVariables.get(\"createdProductResponse\"));\r",
+									"let favJson = JSON.parse(pm.collectionVariables.get(\"createdFavResponse2\"));\r",
+									"\r",
+									"pm.environment.set(\"userId\", userJson.userId);\r",
+									"pm.environment.set(\"productId\", productJson.productId);\r",
+									"pm.environment.set(\"likeDate\", favJson.likeDate);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200)\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{prefix}}favourite-service/api/favourites/{{userId}}/{{productId}}/{{likeDate}}",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}favourite-service"
+							],
+							"path": [
+								"api",
+								"favourites",
+								"{{userId}}",
+								"{{productId}}",
+								"{{likeDate}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Size 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User has 3 favs\", function () {\r",
+									"    const jsonResponse = pm.response.json();\r",
+									"    const collection = jsonResponse.collection || [];\r",
+									"\r",
+									"    // Filtra por userId === 5\r",
+									"    const favoritosUsuario = collection.filter(item => item.userId === 5);\r",
+									"\r",
+									"    // Verifica que la longitud sea exactamente 3\r",
+									"    pm.expect(favoritosUsuario.length).to.eql(2);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{prefix}}favourite-service/api/favourites",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}favourite-service"
+							],
+							"path": [
+								"api",
+								"favourites"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Vamos a añadir los 3 productos que creamos en la primera prueba a los favoritos de nuestro usuario, vamos a validar que su colección de favoritos sea de tamaño 3, luego vamos a borrar el producto favorito 2 y revisamos que el tamaño haya disminuido"
+		},
+		{
+			"name": "Test deleted user",
+			"item": [
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"userId\", userJson.userId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orderId\": {{$randomInt}},\r\n    \"orderDate\": \"23-05-2025__02:05:55:547092\",\r\n    \"orderDesc\": \"{{$randomLoremWord}}\",\r\n    \"orderFee\": {{$randomPrice}},\r\n    \"cart\": {\r\n        \"cartId\": {{cartId}},\r\n        \"userId\": {{userId}}\r\n    }\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://{{prefix}}user-service/api/users/{{userId}}",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}user-service"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Delete",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let userJson = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"\r",
+									"pm.environment.set(\"userId\", userJson.userId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});\r",
+									"\r",
+									"const jsonResponse = pm.response.json();\r",
+									"const collection = jsonResponse.collection || [];\r",
+									"\r",
+									"const deletedUser = JSON.parse(pm.collectionVariables.get(\"createdUserResponse\"));\r",
+									"const deletedUserId = deletedUser.userId;\r",
+									"\r",
+									"const usuarioExiste = collection.some(user => user.userId === deletedUserId);\r",
+									"\r",
+									"pm.test(`User wiht id ${deletedUserId} has been removed`, function () {\r",
+									"    pm.expect(usuarioExiste).to.be.false;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orderId\": {{$randomInt}},\r\n    \"orderDate\": \"23-05-2025__02:05:55:547092\",\r\n    \"orderDesc\": \"{{$randomLoremWord}}\",\r\n    \"orderFee\": {{$randomPrice}},\r\n    \"cart\": {\r\n        \"cartId\": {{cartId}},\r\n        \"userId\": {{userId}}\r\n    }\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://{{prefix}}user-service/api/users",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}user-service"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Favs Crashed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 500 (Null pointer because user doesn't exists anymore)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(500);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{prefix}}favourite-service/api/favourites",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}favourite-service"
+							],
+							"path": [
+								"api",
+								"favourites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Carts Crashed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 500 (Null pointer because user doesn't exists anymore)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(500);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{prefix}}order-service/api/carts",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}order-service"
+							],
+							"path": [
+								"api",
+								"carts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Payment Persist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (because it doesn't directly depends on user)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{prefix}}payment-service/api/payments",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}payment-service"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Order Persist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (because dto returns null in user id)\", function () {\r",
+									"    pm.expect(pm.response.code).equals(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{prefix}}order-service/api/orders",
+							"protocol": "http",
+							"host": [
+								"{{prefix}}order-service"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Vamos a borrar un usuario y dado que la aplicación no tiene ningún tipo de gestion sobre su propia integridad esperamos que las entidades con relacion bidireccional retornen 500 ya que no lograrán encontrar a su usuario a través de los microservios, la única directamente relacionada y exenta es order ya que su dto retorna null siempre para el userId, por lo que esperamos que:\n\nCrasheen\n\n- Favs\n    \n- Carts\n    \n\nPersistan\n\n- Order (devuelve user id null siempre)\n    \n- Payment (depende de order)"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "createdProductResponse",
+			"value": ""
+		},
+		{
+			"key": "createdCategoryResponse",
+			"value": ""
+		},
+		{
+			"key": "prefix",
+			"value": "localhost:8080/",
+			"type": "string"
+		},
+		{
+			"key": "createdUserResponse",
+			"value": ""
+		},
+		{
+			"key": "createdCartResponse",
+			"value": ""
+		},
+		{
+			"key": "createdOrderResponse",
+			"value": ""
+		},
+		{
+			"key": "createdCredentialResponse",
+			"value": ""
+		},
+		{
+			"key": "createdProduct2Response",
+			"value": ""
+		},
+		{
+			"key": "createdProduct3Response",
+			"value": ""
+		},
+		{
+			"key": "createdPaymentResponse",
+			"value": ""
+		},
+		{
+			"key": "createdFavResponse2",
+			"value": ""
+		},
+		{
+			"key": "createdFavResponse3",
+			"value": ""
+		},
+		{
+			"key": "createdShippingResponse",
+			"value": ""
+		},
+		{
+			"key": "updatedShippingResponse",
+			"value": ""
+		}
+	]
+}

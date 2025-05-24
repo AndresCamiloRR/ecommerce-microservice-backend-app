@@ -5,6 +5,7 @@ services:
     ports:
       - 9411:9411
   service-discovery-container:
+    image: leferez/service-discovery:latest
     build:
       context: ./service-discovery
       dockerfile: Dockerfile
@@ -24,6 +25,7 @@ services:
       zipkin-container:
         condition: service_started
   cloud-config-container:
+    image: leferez/cloud-config:latest
     build:
       context: ./cloud-config
       dockerfile: Dockerfile
@@ -47,6 +49,7 @@ services:
       zipkin-container:
         condition: service_started
   api-gateway-container:
+    image: leferez/api-gateway:latest
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
@@ -65,6 +68,7 @@ services:
       zipkin-container:
         condition: service_started
   proxy-client-container:
+    image: leferez/proxy-client:latest
     build:
       context: ./proxy-client
       dockerfile: Dockerfile
@@ -83,6 +87,7 @@ services:
       zipkin-container:
         condition: service_started
   order-service-container:
+    image: leferez/order-service:latest
     build:
       context: ./order-service
       dockerfile: Dockerfile
@@ -101,6 +106,7 @@ services:
       zipkin-container:
         condition: service_started
   payment-service-container:
+    image: leferez/payment-service:latest
     build:
       context: ./payment-service
       dockerfile: Dockerfile
@@ -119,6 +125,7 @@ services:
       zipkin-container:
         condition: service_started
   product-service-container:
+    image: leferez/product-service:latest
     build:
       context: ./product-service
       dockerfile: Dockerfile
@@ -137,6 +144,7 @@ services:
       zipkin-container:
         condition: service_started
   shipping-service-container:
+    image: leferez/shipping-service:latest
     build:
       context: ./shipping-service
       dockerfile: Dockerfile
@@ -155,6 +163,7 @@ services:
       zipkin-container:
         condition: service_started
   user-service-container:
+    image: leferez/user-service:latest
     build:
       context: ./user-service
       dockerfile: Dockerfile
@@ -173,6 +182,7 @@ services:
       zipkin-container:
         condition: service_started
   favourite-service-container:
+    image: leferez/favourite-service:latest
     build:
       context: ./favourite-service
       dockerfile: Dockerfile
@@ -190,6 +200,25 @@ services:
         condition: service_healthy
       zipkin-container:
         condition: service_started
+  locust-container:
+    image: locustio/locust
+    build:
+      context: ./locust
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    environment:
+      - HOST=http://api-gateway-container:8080
+    volumes:
+      - ./locust:/app
+    depends_on:
+      - api-gateway-container
+      - order-service-container
+      - payment-service-container
+      - product-service-container
+      - shipping-service-container
+      - user-service-container
+      - favourite-service-container
 
 
 
