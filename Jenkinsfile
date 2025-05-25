@@ -11,7 +11,14 @@ pipeline {
     CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
-}
+  }
+
+  input {
+    message "Elige un perfil (prod / dev / stage)"
+    parameters {
+      choice(name: 'PROFILE', choices: ['prod', 'dev', 'stage'], description: 'Selecciona el perfil de despliegue')
+    }
+  }
 
   stages {
     
@@ -113,15 +120,15 @@ pipeline {
         sh '''
           echo "Deploying Core Services..."
           echo "Deploying Zipkin..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/zipkin-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/zipkin-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=zipkin --timeout=200s
           
           echo "Deploying Service Discovery..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/service-discovery-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/$PROFILE/service-discovery-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=300s
 
           echo "Deploying Cloud Config..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/cloud-config-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/cloud-config-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=300s
         '''
       }

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-discovery
+  labels:
+    app: service-discovery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-discovery
+  template:
+    metadata:
+      labels:
+        app: service-discovery
+    spec:
+      containers:
+      - name: service-discovery
+        image: leferez/service-discovery:latest
+        ports:
+        - containerPort: 8761
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "stage"
+        - name: SPRING_ZIPKIN_BASE_URL
+          value: "http://zipkin:9411"
+        - name: EUREKA_INSTANCE
+          value: "service-discovery"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health # Eureka health endpoint
+            port: 8761
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health # Eureka health endpoint
+            port: 8761
+          initialDelaySeconds: 45
+          periodSeconds: 15        # Sondea cada 15s
+          failureThreshold: 3      # Considera fallido después de 3 intentos
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-discovery
+spec:
+  selector:
+    app: service-discovery
+  ports:
+  - port: 8761
+    targetPort: 8761
+  type: ClusterIP

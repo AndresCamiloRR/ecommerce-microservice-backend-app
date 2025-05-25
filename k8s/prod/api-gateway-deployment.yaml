@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: leferez/api-gateway:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: SPRING_ZIPKIN_BASE_URL
+          value: "http://zipkin:9411"
+        - name: SPRING_CONFIG_IMPORT
+          value: "optional:configserver:http://cloud-config:9296"
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://service-discovery:8761/eureka/"
+        - name: EUREKA_INSTANCE
+          value: "api-gateway"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health # Spring Boot Actuator health endpoint
+            port: 8080
+          initialDelaySeconds: 60  # Espera 60s antes de la primera sonda
+          periodSeconds: 15        # Sondea cada 15s
+          timeoutSeconds: 5        # Espera 5s por una respuesta
+          failureThreshold: 6      # Considera fallido después de 6 intentos (total 90s)
+        livenessProbe:
+          httpGet:
+            path: /actuator/health # Spring Boot Actuator health endpoint
+            port: 8080
+          initialDelaySeconds: 120 # Espera 120s antes de la primera sonda (más tiempo para arrancar completamente)
+          periodSeconds: 30        # Sondea cada 30s
+          timeoutSeconds: 5        # Espera 5s por una respuesta
+          failureThreshold: 3      # Considera fallido después de 3 intentos
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    app: api-gateway
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: LoadBalancer
