@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'mcr.microsoft.com/azure-cli'
+      args '-u 0:0'
+    }
+  }
 
   environment {
     RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
@@ -80,12 +85,6 @@ pipeline {
     }
     */
     stage('Login Azure') {
-      agent {
-        docker {
-          image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
-          args '-u 0:0'
-        }
-      }
       steps {
         withCredentials([azureServicePrincipal(
           credentialsId: env.AZURE_CREDENTIALS_ID,
@@ -110,12 +109,6 @@ pipeline {
     }
 
     stage('Deploy Core Services') {
-      agent {
-        docker {
-          image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
-          args '-u 0:0'
-        }
-      }
       steps {
         sh """
           az aks install-cli
