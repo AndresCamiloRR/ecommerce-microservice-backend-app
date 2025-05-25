@@ -109,15 +109,13 @@ pipeline {
       }
     }
 
-    stage('Obtener credenciales AKS') {
-      steps {
-        sh '''
-          echo "Este stage ahora está vacío o se puede eliminar si los pasos se movieron."
-        '''
-      }
-    }
-
     stage('Deploy Core Services') {
+      agent {
+        docker {
+          image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
+          args '-u 0:0'
+        }
+      }
       steps {
         sh """
           echo "Deploying Core Services..."
