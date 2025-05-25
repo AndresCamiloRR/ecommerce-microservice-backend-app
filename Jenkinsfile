@@ -17,18 +17,6 @@ pipeline {
       }
     }
 
-    stage('Check Java Version') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
-        }
-      }
-      steps {
-        sh 'java -version'
-        sh 'echo $JAVA_HOME'
-      }
-    }
-
     stage('Checkout') {
       steps {
         checkout scm
@@ -36,11 +24,6 @@ pipeline {
     }
 
     stage('Build') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
-        }
-      }
       steps {
         sh '''
           echo "Building the project..."
@@ -50,11 +33,6 @@ pipeline {
     }
 
     stage('Unit and Integration Tests') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
-        }
-      }
       steps {
         sh '''
           echo "Running unit and integration tests..."
@@ -64,7 +42,6 @@ pipeline {
     }
 
     stage('Build and Push Docker Images') {
-      agent any
       steps {
         withCredentials([usernamePassword(
           credentialsId: 'docker-hub-credentials',
