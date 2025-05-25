@@ -14,11 +14,75 @@ pipeline {
 }
 
   stages {
-    stage('Checkout código') {
+    
+    stage('Clean Workspace') {
+      steps {
+        deleteDir()
+      }
+    }
+    
+    stage('Checkout') {
       steps {
         checkout scm
       }
     }
+    /*
+    stage('Build') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
+        }
+      }
+      steps {
+        sh '''
+          echo "Building the project..."
+          mvn clean package -DskipTests
+        '''
+      }
+    }
+
+    stage('Unit and Integration Tests') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
+        }
+      }
+      steps {
+        sh '''
+          echo "Running unit and integration tests..."
+          mvn clean verify -DskipTests=false
+        '''
+      }
+    }
+
+    stage('Build and Push Docker Images') {
+      agent {
+        docker {
+          image 'docker/compose:1.29.2' // o una versión que incluya ambas cosas
+          args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+      }
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'docker-hub-credentials',
+          usernameVariable: 'DOCKER_USERNAME',
+          passwordVariable: 'DOCKER_PASSWORD'
+        )]) {
+          sh '''
+            echo "Logging in to Docker Hub..."
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+            echo "Building and pushing Docker images..."
+            docker-compose -f compose.yml build
+            docker-compose -f compose.yml push
+
+            echo "Logout from Docker Hub..."
+            docker logout
+          '''
+        }
+      }
+    }
+    */
 
     stage('Login Azure') {
       steps {
@@ -53,8 +117,18 @@ pipeline {
     stage('Desplegar manifiestos') {
       steps {
         sh '''
-          echo "Desplegando recursos de Kubernetes..."
+          echo "Deploying Core Services..."
+          echo "Deploying Zipkin..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/zipkin-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=zipkin --timeout=200s
+          
+          echo "Deploying Service Discovery..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/service-discovery-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=300s
+
+          echo "Deploying Cloud Config..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/cloud-config-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=300s
         '''
       }
     }
