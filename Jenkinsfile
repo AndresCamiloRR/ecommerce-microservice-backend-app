@@ -140,21 +140,20 @@ pipeline {
         sh """
           echo "Deploying Microservices..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/api-gateway-deployment.yaml
-
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/favourite-service-deployment.yaml
-
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/order-service-deployment.yaml
-
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/payment-service-deployment.yaml
-
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/product-service-deployment.yaml
-
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/proxy-client-deployment.yaml
-
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/shipping-service-deployment.yaml
-
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
           kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/user-service-deployment.yaml
-          kubectl wait --for=condition=ready pod -l app=user-service --timeout=500s
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
         """
       }
     }
