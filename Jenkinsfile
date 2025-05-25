@@ -10,6 +10,20 @@ pipeline {
   }
 
   stages {
+
+    stage('Clean Workspace') {
+      steps {
+          deleteDir()
+      }
+    }
+
+    stage('Check Java Version') {
+      steps {
+          sh 'java -version'
+          sh 'echo $JAVA_HOME'
+      }
+    }
+
     stage('Checkout') {
       steps {
         checkout scm
