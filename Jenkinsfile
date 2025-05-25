@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent none
 
   environment {
     RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
@@ -13,14 +13,14 @@ pipeline {
 
     stage('Clean Workspace') {
       steps {
-          deleteDir()
+        deleteDir()
       }
     }
 
     stage('Check Java Version') {
       steps {
-          sh 'java -version'
-          sh 'echo $JAVA_HOME'
+        sh 'java -version'
+        sh 'echo $JAVA_HOME'
       }
     }
 
@@ -31,6 +31,11 @@ pipeline {
     }
 
     stage('Build') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
+        }
+      }
       steps {
         sh '''
           echo "Building the project..."
@@ -40,6 +45,11 @@ pipeline {
     }
 
     stage('Unit and Integration Tests') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
+        }
+      }
       steps {
         sh '''
           echo "Running unit and integration tests..."
@@ -49,6 +59,7 @@ pipeline {
     }
 
     stage('Build and Push Docker Images') {
+      agent any
       steps {
         withCredentials([usernamePassword(
           credentialsId: 'docker-hub-credentials',
