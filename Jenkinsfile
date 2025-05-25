@@ -120,18 +120,17 @@ pipeline {
     stage('Deploy Core Services') {
       steps {
         sh """
-          cd ${K8S_MANIFESTS_DIR}
           echo "Deploying Core Services..."
           echo "Deploying Zipkin..."
-          kubectl apply -f zipkin-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/zipkin-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=zipkin --timeout=200s
 
           echo "Deploying Service Discovery..."
-          kubectl apply -f service-discovery-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/service-discovery-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=300s
 
           echo "Deploying Cloud Config..."
-          kubectl apply -f cloud-config-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/cloud-config-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=300s
         """
       }
