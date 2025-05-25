@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
-      args '-u 0:0'
-    }
-  }
+  agent any
 
   environment {
     RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
@@ -12,12 +7,21 @@ pipeline {
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // ID de la credencial de Jenkins
     PROFILE_CREDENTIAL_ID   = 'profile'
-}
+  }
 
   stages {
     stage('Checkout') {
       steps {
         checkout scm
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh '''
+          echo "Building the project..."
+          ./mvnw clean package -DskipTests
+        '''
       }
     }
 
