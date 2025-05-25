@@ -118,6 +118,7 @@ pipeline {
       }
       steps {
         sh """
+          az aks install-cli
           echo "Deploying Core Services..."
           echo "Deploying Zipkin..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/zipkin-deployment.yaml
