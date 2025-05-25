@@ -2,13 +2,25 @@ from locust import HttpUser, task, between
 import random
 from datetime import datetime
 import dotenv
+import os # Importar os
 
 class Test(HttpUser):
     wait_time = between(1, 2)
 
-    host = dotenv.get_key('.env', 'HOST')
-    if host is None:
-        host = "http://localhost:8080"
+    # Attempt to get HOST from environment variable (typically set by Docker)
+    host = os.getenv('HOST')
+
+    if not host:
+        # If HOST environment variable is not set, try to load from .env file
+        # This is useful for local development runs without Docker or if HOST is not in the environment
+        host_from_dotenv = dotenv.get_key('.env', 'HOST')
+        if host_from_dotenv:
+            host = host_from_dotenv
+        else:
+            # Fallback to a default host if not found in environment variables or .env file
+            host = "http://localhost:8080"
+            # Optional: print a warning that a default is being used
+            # print(f"Warning: HOST not set via environment or .env. Defaulting to {host}")
 
     # Caso de uso 1: Consultar los productos
     @task
@@ -144,4 +156,3 @@ class Test(HttpUser):
             }
         )
 
-    

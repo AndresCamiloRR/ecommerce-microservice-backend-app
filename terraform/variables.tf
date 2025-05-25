@@ -13,6 +13,3 @@ variable "aks_cluster_name" {
 variable "dns_prefix" {
   default = "miaksdns"
 }
-
-variable "client_id" {}
-variable "client_secret" {}
