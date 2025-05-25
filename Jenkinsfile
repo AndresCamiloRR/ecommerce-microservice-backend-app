@@ -170,24 +170,5 @@ pipeline {
         '''
       }
     }
-
-    //Desplegar main-ingress si es prod, desplegar dev-main-ingress si es dev o stage
-    stage('Desplegar Ingress') {
-      steps {
-        script {
-          if (env.PROFILE == 'prod') {
-            sh '''
-              echo "Deploying Ingress..."
-              kubectl apply -f ${K8S_MANIFESTS_DIR}/core/main-ingress.yaml
-            '''
-          } else if (env.PROFILE == 'dev' || env.PROFILE == 'stage') {
-            sh '''
-              echo "Deploying Ingress..."
-              kubectl apply -f ${K8S_MANIFESTS_DIR}/core/dev-main-ingress.yaml
-            '''
-          }
-        }
-      }
-    }
   }
 }
