@@ -54,7 +54,8 @@ pipeline {
     stage('Build and Push Docker Images') {
       agent {
         docker {
-          image 'docker:20.10.7' // Docker CLI
+          image 'docker/compose:1.29.2' // o una versión que incluya ambas cosas
+          args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
       }
       steps {
