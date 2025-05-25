@@ -166,14 +166,15 @@ pipeline {
       }
     }
 
-    if (env.PROFILE == 'dev' || env.PROFILE == 'stage') {
-      stage('Desplegar Locust') {
-        steps {
-          sh '''
-            echo "Deploying Locust..."
-            kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust.yaml
-          '''
-        }
+    stage('Desplegar Locust') {
+      when {
+        expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
+      }
+      steps {
+        sh '''
+          echo "Deploying Locust..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust.yaml
+        '''
       }
     }
   }
