@@ -134,5 +134,47 @@ pipeline {
         '''
       }
     }
+
+    stage('Desplegar microservicios') {
+      steps {
+        sh """
+          echo "Deploying Microservices..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/api-gateway-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=api-gateway --timeout=300s
+
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/favourite-service-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=favourite-service --timeout=300s
+
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/order-service-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=order-service --timeout=300s
+
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/payment-service-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=payment-service --timeout=300s
+
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/product-service-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=product-service --timeout=300s
+
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/proxy-client-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=proxy-client --timeout=300s
+
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/shipping-service-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=shipping-service --timeout=300s
+
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/user-service-deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
+        """
+      }
+    }
+
+    if (env.PROFILE == 'dev' || env.PROFILE == 'stage') {
+      stage('Desplegar Locust') {
+        steps {
+          sh '''
+            echo "Deploying Locust..."
+            kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust.yaml
+          '''
+        }
+      }
+    }
   }
 }
