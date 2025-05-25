@@ -155,6 +155,9 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Terraform files
+terraform/providers.tf
+
 # IPython
 profile_default/
 ipython_config.py
