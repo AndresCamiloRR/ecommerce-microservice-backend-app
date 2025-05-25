@@ -1,5 +1,5 @@
 pipeline {
-  agent none
+  agent any
 
   environment {
     RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
@@ -18,6 +18,11 @@ pipeline {
     }
 
     stage('Check Java Version') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
+        }
+      }
       steps {
         sh 'java -version'
         sh 'echo $JAVA_HOME'
