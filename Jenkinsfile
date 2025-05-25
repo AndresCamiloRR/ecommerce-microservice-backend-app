@@ -44,7 +44,7 @@ pipeline {
       steps {
         sh '''
           echo "Building the project..."
-          mvnw clean package -DskipTests
+          mvn clean package -DskipTests
         '''
       }
     }
@@ -58,7 +58,7 @@ pipeline {
       steps {
         sh '''
           echo "Running unit and integration tests..."
-          mvnw clean verify -DskipTests=false
+          mvn clean verify -DskipTests=false
         '''
       }
     }
