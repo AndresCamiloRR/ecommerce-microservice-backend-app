@@ -13,15 +13,16 @@ pipeline {
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
   }
 
-  input {
-    message "Elige un perfil (prod / dev / stage)"
-    parameters {
-      choice(name: 'PROFILE', choices: ['prod', 'dev', 'stage'], description: 'Selecciona el perfil de despliegue')
-    }
-  }
-
   stages {
-    
+    stage('User Input') {
+      steps {
+        script {
+          env.PROFILE = input message: "Elige un perfil (prod / dev / stage)",
+                              parameters: [choice(name: 'PROFILE', choices: ['prod', 'dev', 'stage'], description: 'Selecciona el perfil de despliegue')]
+        }
+      }
+    }
+
     stage('Checkout') {
       steps {
         checkout scm
