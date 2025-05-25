@@ -16,7 +16,7 @@ pipeline {
         deleteDir()
       }
     }
-
+    /*
     stage('Checkout') {
       steps {
         checkout scm
@@ -78,8 +78,14 @@ pipeline {
         }
       }
     }
-    /*
+    */
     stage('Login Azure') {
+      agent {
+        docker {
+          image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
+          args '-u 0:0'
+        }
+      }
       steps {
         withCredentials([azureServicePrincipal(
           credentialsId: env.AZURE_CREDENTIALS_ID,
@@ -127,7 +133,7 @@ pipeline {
         """
       }
     }
-
+    /*
     stage('Deploy Remaining Services') {
       steps {
         script {
