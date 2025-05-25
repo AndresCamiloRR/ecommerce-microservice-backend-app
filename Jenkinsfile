@@ -98,6 +98,12 @@ pipeline {
             echo "Iniciando sesión en Azure..."
             az login --service-principal -u $AZ_CLIENT_ID -p $AZ_CLIENT_SECRET --tenant $AZ_TENANT_ID
             az account set --subscription $AZ_SUBSCRIPTION_ID
+
+            echo "Instalando kubectl..."
+            az aks install-cli
+            echo "Obteniendo credenciales del clúster..."
+            az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
+            kubectl config current-context
           '''
         }
       }
@@ -106,11 +112,7 @@ pipeline {
     stage('Obtener credenciales AKS') {
       steps {
         sh '''
-          echo "Instalando kubectl..."
-          az aks install-cli
-          echo "Obteniendo credenciales del clúster..."
-          az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
-          kubectl config current-context
+          echo "Este stage ahora está vacío o se puede eliminar si los pasos se movieron."
         '''
       }
     }
@@ -118,17 +120,18 @@ pipeline {
     stage('Deploy Core Services') {
       steps {
         sh """
+          cd ${K8S_MANIFESTS_DIR}
           echo "Deploying Core Services..."
           echo "Deploying Zipkin..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/zipkin-deployment.yaml
+          kubectl apply -f zipkin-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=zipkin --timeout=200s
 
           echo "Deploying Service Discovery..."
-          kubectl apply -f <(envsubst < "${K8S_MANIFESTS_DIR}/service-discovery-deployment.yaml")
+          kubectl apply -f service-discovery-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=300s
 
           echo "Deploying Cloud Config..."
-          kubectl apply -f <(envsubst < "${K8S_MANIFESTS_DIR}/cloud-config-deployment.yaml")
+          kubectl apply -f cloud-config-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=300s
         """
       }
