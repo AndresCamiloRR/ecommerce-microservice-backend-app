@@ -201,7 +201,7 @@ services:
       zipkin-container:
         condition: service_started
   locust-container:
-    image: locustio/locust
+    image: leferez/locust
     build:
       context: ./locust
       dockerfile: Dockerfile
