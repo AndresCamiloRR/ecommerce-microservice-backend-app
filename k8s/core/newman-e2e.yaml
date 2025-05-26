@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: newman-e2e-tests
+spec:
+  template:
+    metadata:
+      name: newman
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: newman
+          image: leferez/newman-e2e:latest
+          volumeMounts:
+            - name: reports
+              mountPath: /etc/newman/reports
+      volumes:
+        - name: reports
+          emptyDir: {}

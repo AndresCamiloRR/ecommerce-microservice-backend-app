@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "c14f6791-1302-4e86-9ef9-251344b6e318",
-		"name": "Ecommerce e2e",
+		"name": "E2E",
 		"description": "Pruebas E2E realizadas con postman y newman",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "34458513"
@@ -401,6 +401,34 @@
 				},
 				{
 					"name": "Check Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const products = pm.response.json().collection;\r",
+									"\r",
+									"pm.test('\"lenovo legion\" exists', function () {\r",
+									"    const found = products.some(p => p.productTitle === \"lenovo legion\");\r",
+									"    pm.expect(found).to.be.true;\r",
+									"});\r",
+									"\r",
+									"pm.test('\"hp omen\" exists', function () {\r",
+									"    const found = products.some(p => p.productTitle === \"hp omen\");\r",
+									"    pm.expect(found).to.be.true;\r",
+									"});\r",
+									"\r",
+									"pm.test('\"hp victus\" exists', function () {\r",
+									"    const found = products.some(p => p.productTitle === \"hp victus\");\r",
+									"    pm.expect(found).to.be.true;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1687,7 +1715,7 @@
 		},
 		{
 			"key": "prefix",
-			"value": "localhost:8080/",
+			"value": "api-gateway:8080/",
 			"type": "string"
 		},
 		{

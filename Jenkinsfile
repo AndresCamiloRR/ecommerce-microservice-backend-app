@@ -11,6 +11,9 @@ pipeline {
     CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
+    NEWMAN_IMAGE_NAME = 'yourdockerhubusername/ecommerce-newman-runner' // ¡¡CAMBIA ESTO por tu usuario de Docker Hub y nombre de imagen!!
+    NEWMAN_IMAGE_TAG = "latest" // O puedes usar algo como "${env.BUILD_NUMBER}"
+    NEWMAN_REPORTS_DIR = 'newman-reports' // Directorio para los reportes de Newman
   }
 
   stages {
@@ -158,6 +161,17 @@ pipeline {
         """
       }
     }
+    stage('Correr e2e') {
+      when {
+        expression { env.PROFILE == 'dev' }
+      }
+      steps {
+        sh '''
+          echo "Running E2E tests..."
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/newman-e2e-job.yaml
+        '''
+      }
+    }
 
     stage('Desplegar Locust') {
       when {
@@ -168,6 +182,89 @@ pipeline {
           echo "Deploying Locust..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust-deployment.yaml
         '''
+      }
+    }
+
+    stage('Build E2E Test Image') {
+      agent {
+        docker {
+          image 'docker/compose:1.29.2' // Imagen con cliente Docker
+          args '-v /var/run/docker.sock:/var/run/docker.sock' // Montar el socket de Docker
+        }
+      }
+      steps {
+        script {
+          // Asegurar que el directorio newman exista en el workspace
+          sh "mkdir -p ${env.WORKSPACE}/newman"
+          // Copiar la colección de Postman al directorio 'newman' que será el contexto de build de Docker
+          sh "cp \\"${env.WORKSPACE}/Ecommerce e2e.postman_collection.json\\" \\"${env.WORKSPACE}/newman/Ecommerce e2e.postman_collection.json\\""
+          
+          // Iniciar sesión en Docker Hub (u otro registro)
+          // Asegúrate de que 'docker-hub-credentials' exista en Jenkins
+          docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
+            // Construir la imagen de Docker. El Dockerfile está en newman/Dockerfile.
+            // El contexto de build es el directorio 'newman'.
+            def customImage = docker.build("${env.NEWMAN_IMAGE_NAME}:${env.NEWMAN_IMAGE_TAG}", "-f ${env.WORKSPACE}/newman/Dockerfile ${env.WORKSPACE}/newman")
+            customImage.push()
+            echo "Newman Docker image pushed: ${env.NEWMAN_IMAGE_NAME}:${env.NEWMAN_IMAGE_TAG}"
+          }
+        }
+      }
+    }
+
+    stage('Run E2E Tests in Kubernetes') {
+      // Esta etapa se ejecuta después de que los microservicios se hayan desplegado.
+      // Utiliza el agente de Azure CLI que ya tiene kubectl.
+      steps {
+        script {
+          def podName = "newman-e2e-tests-${env.BUILD_NUMBER}"
+          // El namespace de Kubernetes se establece a 'default'.
+          def k8sNamespace = "default" 
+
+          sh """
+            echo "Running E2E tests with Newman in Kubernetes in namespace ${k8sNamespace}..."
+
+            # Crear y ejecutar el pod de Newman.
+            # La colección se llama 'collection.json' dentro de la imagen (ver Dockerfile).
+            # No se pasa la variable 'prefix' a Newman ya que está definida en la colección.
+            kubectl run ${podName} \\
+              --image=${env.NEWMAN_IMAGE_NAME}:${env.NEWMAN_IMAGE_TAG} \\
+              --namespace=${k8sNamespace} \\
+              --restart=Never \\
+              --command -- /bin/sh -c "mkdir -p /reports && newman run collection.json -r cli,htmlextra --reporter-htmlextra-export /reports/report.html"
+
+            echo "Waiting for pod ${podName} to complete in namespace ${k8sNamespace}..."
+            kubectl wait --for=condition=Succeeded pod/${podName} --namespace=${k8sNamespace} --timeout=600s
+
+            echo "Copying reports from pod ${podName} from namespace ${k8sNamespace}..."
+            # Asegurar que el directorio local para los reportes exista
+            mkdir -p ${env.WORKSPACE}/${env.NEWMAN_REPORTS_DIR}
+            kubectl cp ${k8sNamespace}/${podName}:/reports/report.html ${env.WORKSPACE}/${env.NEWMAN_REPORTS_DIR}/report.html
+
+            echo "Displaying logs from pod ${podName} from namespace ${k8sNamespace}..."
+            kubectl logs ${podName} --namespace=${k8sNamespace}
+
+            echo "Deleting pod ${podName} from namespace ${k8sNamespace}..."
+            kubectl delete pod ${podName} --namespace=${k8sNamespace}
+          """
+          // Archivar los reportes HTML
+          archiveArtifacts artifacts: "${env.NEWMAN_REPORTS_DIR}/report.html", fingerprint: true
+        }
+      }
+      post {
+        always {
+          // Publicar el reporte HTML en Jenkins
+          publishHTML([
+            allowMissing: true, 
+            alwaysLinkToLastBuild: true, 
+            keepAll: true, 
+            reportDir: env.NEWMAN_REPORTS_DIR, 
+            reportFiles: 'report.html', 
+            reportName: "Newman E2E (${env.PROFILE}) Test Report"
+          ])
+        }
+        // Podrías añadir aquí lógica para marcar el build como fallido si las pruebas fallan,
+        // por ejemplo, analizando los logs de Newman o si Newman puede generar un archivo de estado.
       }
     }
   }

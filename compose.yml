@@ -219,6 +219,13 @@ services:
       - shipping-service-container
       - user-service-container
       - favourite-service-container
+  newman-container:
+    image: leferez/newman-e2e:latest
+    build:
+      context: ./newman
+      dockerfile: Dockerfile
+    ports:
+      - 8082:8082
 
 
 
