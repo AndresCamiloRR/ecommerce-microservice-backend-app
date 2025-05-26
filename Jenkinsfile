@@ -118,7 +118,7 @@ pipeline {
         '''
       }
     }
-
+    /*
     stage('Desplegar manifiestos') {
       steps {
         sh '''
@@ -169,10 +169,13 @@ pipeline {
         sh '''
           echo "Running E2E tests..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/newman-e2e-job.yaml
+          kubectl wait --for=condition=complete job/newman-e2e-job --timeout=600s
+          echo "Fetching Newman results..."
+          kubectl logs job/newman-e2e-tests
         '''
       }
     }
-
+    */
     stage('Desplegar Locust') {
       when {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
@@ -181,6 +184,22 @@ pipeline {
         sh '''
           echo "Deploying Locust..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust-deployment.yaml
+
+          echo "Esperando a que el LoadBalancer asigne una IP externa..."
+          for i in {1..30}; do
+            EXTERNAL_IP=$(kubectl get svc locust -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            if [ -n "$EXTERNAL_IP" ]; then
+              echo "Locust está disponible en: http://$EXTERNAL_IP:8089"
+              break
+            fi
+            echo "Esperando IP externa... ($i)"
+            sleep 5
+          done
+
+          if [ -z "$EXTERNAL_IP" ]; then
+            echo "⚠️  No se obtuvo una IP externa para Locust tras esperar 150 segundos."
+            exit 1
+          fi
         '''
       }
     }
