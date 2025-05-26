@@ -1,19 +1,11 @@
 pipeline {
-  agent {
-    docker {
-      image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
-      args '-u 0:0'
-    }
-  }
+  agent any
 
   environment {
     RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
     CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
-    NEWMAN_IMAGE_NAME = 'yourdockerhubusername/ecommerce-newman-runner' // ¡¡CAMBIA ESTO por tu usuario de Docker Hub y nombre de imagen!!
-    NEWMAN_IMAGE_TAG = "latest" // O puedes usar algo como "${env.BUILD_NUMBER}"
-    NEWMAN_REPORTS_DIR = 'newman-reports' // Directorio para los reportes de Newman
   }
 
   stages {
@@ -33,11 +25,6 @@ pipeline {
     }
     
     stage('Build') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
-        }
-      }
       steps {
         sh '''
           echo "Building the project..."
@@ -47,11 +34,6 @@ pipeline {
     }
 
     stage('Unit and Integration Tests') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
-        }
-      }
       steps {
         sh '''
           echo "Running unit and integration tests..."
@@ -61,12 +43,6 @@ pipeline {
     }
 
     stage('Build and Push Docker Images') {
-      agent {
-        docker {
-          image 'docker/compose:1.29.2' // o una versión que incluya ambas cosas
-          args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-      }
       steps {
         withCredentials([usernamePassword(
           credentialsId: 'docker-hub-credentials',
