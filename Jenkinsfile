@@ -41,7 +41,7 @@ pipeline {
       steps {
         sh '''
           echo "Building the project..."
-          mvn clean package -DskipTests
+          mvn -X clean package -DskipTests
         '''
       }
     }
