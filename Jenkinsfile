@@ -26,7 +26,7 @@ pipeline {
     
     stage('Build') {
       steps {
-        sh '''
+        bat '''
           echo "Building the project..."
           mvn -X clean package -DskipTests
         '''
@@ -35,7 +35,7 @@ pipeline {
 
     stage('Unit and Integration Tests') {
       steps {
-        sh '''
+        bat '''
           echo "Running unit and integration tests..."
           mvn clean verify -DskipTests=false
         '''
@@ -49,9 +49,9 @@ pipeline {
           usernameVariable: 'DOCKER_USERNAME',
           passwordVariable: 'DOCKER_PASSWORD'
         )]) {
-          sh '''
+          bat '''
             echo "Logging in to Docker Hub..."
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin
 
             echo "Building and pushing Docker images..."
             docker-compose -f compose.yml build
@@ -74,10 +74,10 @@ pipeline {
           clientSecretVariable: 'AZ_CLIENT_SECRET',
           tenantIdVariable: 'AZ_TENANT_ID'
         )]) {
-          sh '''
+          bat '''
             echo "Iniciando sesión en Azure..."
-            az login --service-principal -u $AZ_CLIENT_ID -p $AZ_CLIENT_SECRET --tenant $AZ_TENANT_ID
-            az account set --subscription $AZ_SUBSCRIPTION_ID
+            az login --service-principal -u %AZ_CLIENT_ID% -p %AZ_CLIENT_SECRET% --tenant %AZ_TENANT_ID%
+            az account set --subscription %AZ_SUBSCRIPTION_ID%
           '''
         }
       }
@@ -85,11 +85,11 @@ pipeline {
 
     stage('Obtener credenciales AKS') {
       steps {
-        sh '''
+        bat '''
           echo "Instalando kubectl..."
           az aks install-cli
-          echo "Obteniendo credenciales del clúster..."
-          az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
+          echo "Obteniendo credenciales del clÃºster..."
+          az aks get-credentials --resource-group %RESOURCE_GROUP% --name %CLUSTER_NAME% --overwrite-existing
           kubectl config current-context
         '''
       }
@@ -97,14 +97,14 @@ pipeline {
     
     stage('Desplegar manifiestos') {
       steps {
-        sh '''
+        bat '''
           echo "Deploying Core Services..."
           echo "Deploying Zipkin..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/zipkin-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=zipkin --timeout=200s
           
           echo "Deploying Service Discovery..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/$PROFILE/service-discovery-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/service-discovery-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=300s
 
           echo "Deploying Cloud Config..."
@@ -116,23 +116,23 @@ pipeline {
 
     stage('Desplegar microservicios') {
       steps {
-        sh """
+        bat """
           echo "Deploying Microservices..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/api-gateway-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/api-gateway-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=api-gateway --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/favourite-service-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/favourite-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=favourite-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/order-service-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/order-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=order-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/payment-service-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/payment-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=payment-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/product-service-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/product-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=product-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/proxy-client-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/proxy-client-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=proxy-client --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/shipping-service-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/shipping-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=shipping-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/${PROFILE}/user-service-deployment.yaml
+          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/user-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
         """
       }
@@ -142,7 +142,7 @@ pipeline {
         expression { env.PROFILE == 'dev' }
       }
       steps {
-        sh '''
+        bat '''
           echo "Running E2E tests..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/newman-e2e-job.yaml
           kubectl wait --for=condition=complete job/newman-e2e-job --timeout=600s
@@ -157,25 +157,25 @@ pipeline {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
       }
       steps {
-        sh '''
+        bat '''
           echo "Deploying Locust..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust-deployment.yaml
 
           echo "Esperando a que el LoadBalancer asigne una IP externa..."
-          for i in {1..30}; do
-            EXTERNAL_IP=$(kubectl get svc locust -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-            if [ -n "$EXTERNAL_IP" ]; then
-              echo "Locust está disponible en: http://$EXTERNAL_IP:8089"
-              break
-            fi
-            echo "Esperando IP externa... ($i)"
-            sleep 5
-          done
+          for /L %%i in (1,1,30) do (
+            for /f "tokens=*" %%j in ('kubectl get svc locust -o jsonpath="{.status.loadBalancer.ingress[0].ip}"') do set EXTERNAL_IP=%%j
+            if defined EXTERNAL_IP (
+              echo Locust estÃ¡ disponible en: http://%EXTERNAL_IP%:8089
+              goto :locust_done
+            )
+            echo "Esperando IP externa... (%%i)"
+            timeout /t 5 /nobreak > nul
+          )
 
-          if [ -z "$EXTERNAL_IP" ]; then
-            echo "⚠️  No se obtuvo una IP externa para Locust tras esperar 150 segundos."
-            exit 1
-          fi
+          echo "âš ï¸  No se obtuvo una IP externa para Locust tras esperar 150 segundos."
+          exit /b 1
+          
+          :locust_done
         '''
       }
     }
