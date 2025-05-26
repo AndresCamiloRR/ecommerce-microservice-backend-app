@@ -28,7 +28,7 @@ pipeline {
       steps {
         bat '''
           echo "Building the project..."
-          mvn -X clean package -DskipTests
+          ./mvnw clean package -DskipTests
         '''
       }
     }
@@ -37,7 +37,7 @@ pipeline {
       steps {
         bat '''
           echo "Running unit and integration tests..."
-          mvn clean verify -DskipTests=false
+          ./mvnw clean verify -DskipTests=false
         '''
       }
     }
