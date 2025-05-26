@@ -46,22 +46,9 @@ class UserServiceImplTest {
     private static final String DEFAULT_IMAGE_URL = "http://example.com/image.jpg";
     private static final String DEFAULT_USERNAME = "johndoe";
     private static final String DEFAULT_PASSWORD = "password123";
-
-    private static final String UPDATED_FIRST_NAME = "Jane";
-    private static final String UPDATED_LAST_NAME = "Doe";
-    private static final String UPDATED_EMAIL = "jane.doe@example.com";
     
     @BeforeEach
     void setUp() {
-
-        CredentialDto credentialDto = CredentialDto.builder()
-                .username(DEFAULT_USERNAME)
-                .password(DEFAULT_PASSWORD)
-                .isEnabled(true)
-                .isAccountNonExpired(true)
-                .isAccountNonLocked(true)
-                .isCredentialsNonExpired(true)
-                .build();
 
         // Entidad User para comparaciones directas con el repositorio
         Credential credential = Credential.builder()
