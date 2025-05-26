@@ -175,7 +175,7 @@ pipeline {
         '''
       }
     }
-    */
+    
     stage('Desplegar Locust') {
       when {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
