@@ -101,15 +101,15 @@ pipeline {
         bat '''
           echo "Deploying Core Services..."
           echo "Deploying Zipkin..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/zipkin-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/core/zipkin-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=zipkin --timeout=200s
           
           echo "Deploying Service Discovery..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/service-discovery-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/service-discovery-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=service-discovery --timeout=300s
 
           echo "Deploying Cloud Config..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/cloud-config-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/core/cloud-config-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=cloud-config --timeout=300s
         '''
       }
@@ -119,21 +119,21 @@ pipeline {
       steps {
         bat """
           echo "Deploying Microservices..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/api-gateway-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/api-gateway-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=api-gateway --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/favourite-service-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/favourite-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=favourite-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/order-service-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/order-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=order-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/payment-service-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/payment-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=payment-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/product-service-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/product-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=product-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/proxy-client-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/proxy-client-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=proxy-client --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/shipping-service-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/shipping-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=shipping-service --timeout=300s
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/%PROFILE%/user-service-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/%PROFILE%/user-service-deployment.yaml
           kubectl wait --for=condition=ready pod -l app=user-service --timeout=300s
         """
       }
@@ -145,7 +145,7 @@ pipeline {
       steps {
         bat '''
           echo "Running E2E tests..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/newman-e2e-job.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/core/newman-e2e-job.yaml
           kubectl wait --for=condition=complete job/newman-e2e-job --timeout=600s
           echo "Fetching Newman results..."
           kubectl logs job/newman-e2e-tests
@@ -160,7 +160,7 @@ pipeline {
       steps {
         bat '''
           echo "Deploying Locust..."
-          kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust-deployment.yaml
+          kubectl apply -f %K8S_MANIFESTS_DIR%/core/locust-deployment.yaml
 
           echo "Esperando a que el LoadBalancer asigne una IP externa..."
           for /L %%i in (1,1,30) do (
