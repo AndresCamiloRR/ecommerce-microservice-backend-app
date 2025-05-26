@@ -6,6 +6,7 @@ pipeline {
     CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
+    JAVA_HOME = "C:\\Program Files\\Java\\jdk-17" // <--- IMPORTANT: SET YOUR JDK PATH HERE
   }
 
   stages {
