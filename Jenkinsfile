@@ -18,13 +18,13 @@ pipeline {
         }
       }
     }
-
+  
     stage('Checkout') {
       steps {
         checkout scm
       }
     }
-    
+    /*
     stage('Build') {
       steps {
         bat '''
@@ -65,7 +65,7 @@ pipeline {
       }
     }
     
-
+    */
     stage('Login Azure') {
       steps {
         withCredentials([azureServicePrincipal(
