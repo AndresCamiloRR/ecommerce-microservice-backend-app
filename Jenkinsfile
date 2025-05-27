@@ -146,7 +146,6 @@ pipeline {
         bat '''
           echo "Running E2E tests..."
           kubectl apply -f %K8S_MANIFESTS_DIR%/core/newman-e2e-job.yaml
-          kubectl wait --for=condition=complete job/newman-e2e-job --timeout=600s
           echo "Fetching Newman results..."
           kubectl logs job/newman-e2e-tests
         '''

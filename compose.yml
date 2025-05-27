@@ -14,7 +14,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_INSTANCE=zipkin-container
+      - EUREKA_INSTANCE=service-discovery-container
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
       interval: 30s
@@ -34,9 +34,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_ZIPKIN_BASE_URL=http://zipkin-container:9411
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://service-discovery-container:8761/eureka/
-      - EUREKA_INSTANCE=service-discovery-container
+      - EUREKA_INSTANCE=cloud-config-container
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9296/actuator/health || exit 1"]
       interval: 30s
