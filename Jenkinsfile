@@ -76,7 +76,7 @@ pipeline {
           tenantIdVariable: 'AZ_TENANT_ID'
         )]) {
           bat '''
-            echo "Iniciando sesión en Azure..."
+            echo "Iniciando sesion en Azure..."
             az login --service-principal -u %AZ_CLIENT_ID% -p %AZ_CLIENT_SECRET% --tenant %AZ_TENANT_ID%
             az account set --subscription %AZ_SUBSCRIPTION_ID%
           '''
@@ -87,15 +87,13 @@ pipeline {
     stage('Obtener credenciales AKS') {
       steps {
         bat '''
-          echo "Instalando kubectl..."
-          az aks install-cli
           echo "Obteniendo credenciales del clÃºster..."
           az aks get-credentials --resource-group %RESOURCE_GROUP% --name %CLUSTER_NAME% --overwrite-existing
           kubectl config current-context
         '''
       }
     }
-    
+    /*
     stage('Desplegar manifiestos') {
       steps {
         bat '''
@@ -152,7 +150,7 @@ pipeline {
         '''
       }
     }
-    
+    */
     stage('Desplegar Locust') {
       when {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
@@ -164,21 +162,46 @@ pipeline {
 
           echo "Esperando a que el LoadBalancer asigne una IP externa..."
           for /L %%i in (1,1,30) do (
-            for /f "tokens=*" %%j in ('kubectl get svc locust -o jsonpath="{.status.loadBalancer.ingress[0].ip}"') do set EXTERNAL_IP=%%j
+            for /f "tokens=*" %%j in ('kubectl get svc locust -o jsonpath="{.status.loadBalancer.ingress[0].ip}" 2^>nul') do set EXTERNAL_IP=%%j
             if defined EXTERNAL_IP (
-              echo Locust estÃ¡ disponible en: http://%EXTERNAL_IP%:8089
-              goto :locust_done
+              if not "%EXTERNAL_IP%"=="" (
+                echo Locust está disponible en: http://%EXTERNAL_IP%:8089
+                goto :locust_done
+              )
             )
             echo "Esperando IP externa... (%%i)"
-            timeout /t 5 /nobreak > nul
+            ping -n 6 127.0.0.1 > nul 2>&1
           )
 
-          echo "âš ï¸  No se obtuvo una IP externa para Locust tras esperar 150 segundos."
+          echo "No se obtuvo una IP externa para Locust tras esperar 150 segundos."
           exit /b 1
           
           :locust_done
         '''
       }
     }
+
+    stage('Generar Release Notes') {
+      steps {
+        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+          bat '''
+            echo Autenticando con GitHub CLI...
+            echo %GITHUB_TOKEN% > token.txt
+            gh auth login --with-token < token.txt
+            del token.txt
+
+            echo Obteniendo últimos 10 commits...
+            git log -n 10 --pretty=format:"- %%s" > release-notes.md
+
+            echo Obteniendo el SHA corto del último commit...
+            for /f %%i in ('git rev-parse --short HEAD') do set COMMIT_SHORT=%%i
+
+            echo Creando release con nombre v%COMMIT_SHORT%...
+            gh release create v%COMMIT_SHORT% --title "Release v%COMMIT_SHORT%" --notes-file release-notes.md
+          '''
+        }
+      }
+    }
+
   }
 }
