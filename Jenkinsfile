@@ -6,6 +6,10 @@ pipeline {
     }
   }
 
+  options {
+    skipDefaultCheckout true // Deshabilitamos el checkout automático
+  }
+
   environment {
     RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
     CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
@@ -14,9 +18,21 @@ pipeline {
     NEWMAN_IMAGE_NAME = 'yourdockerhubusername/ecommerce-newman-runner' // ¡¡CAMBIA ESTO por tu usuario de Docker Hub y nombre de imagen!!
     NEWMAN_IMAGE_TAG = "latest" // O puedes usar algo como "${env.BUILD_NUMBER}"
     NEWMAN_REPORTS_DIR = 'newman-reports' // Directorio para los reportes de Newman
+    GIT_TRACE = "1" // Habilita logs detallados de Git
+    GIT_CURL_VERBOSE = "1" // Habilita logs detallados de Git para operaciones HTTP
   }
 
   stages {
+    stage('Prepare Workspace') {
+      steps {
+        echo "Cleaning workspace..."
+        cleanWs()
+        echo "Checking out SCM..."
+        checkout scm
+        sh 'echo "Git checkout complete. Current directory:" && pwd && ls -la .git'
+      }
+    }
+
     stage('User Input') {
       steps {
         script {
@@ -26,11 +42,6 @@ pipeline {
       }
     }
 
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
     /*
     stage('Build') {
       agent {
