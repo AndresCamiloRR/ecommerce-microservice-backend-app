@@ -168,7 +168,7 @@ pipeline {
         '''
       }
     }
-    /*
+    
     stage('Desplegar manifiestos') {
       steps {
         sh '''
@@ -235,7 +235,7 @@ pipeline {
           echo "Deploying Locust..."
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust-deployment.yaml
 
-          echo "Esperando a que el LoadBalancer asigne una IP externa..."
+          echo "Esperando a que el LoadBalancer asigne una IP externa a Locust..."
           for i in {1..30}; do
             EXTERNAL_IP=$(kubectl get svc locust -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
             if [ -n "$EXTERNAL_IP" ]; then
@@ -250,6 +250,24 @@ pipeline {
             echo "⚠️  No se obtuvo una IP externa para Locust tras esperar 150 segundos."
             exit 1
           fi
+
+          echo "Esperando a que el LoadBalancer asigne una IP externa para API Gateway..."
+          API_GATEWAY_EXTERNAL_IP=""
+          for i in {1..30}; do
+            API_GATEWAY_EXTERNAL_IP=\\$(kubectl get svc api-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+            if [ -n "\\$API_GATEWAY_EXTERNAL_IP" ]; then
+              echo "API Gateway IP externa: \\$API_GATEWAY_EXTERNAL_IP"
+              break
+            fi
+            echo "Esperando IP externa para API Gateway... (intento \\$i de 30)"
+            sleep 5
+          done
+
+          if [ -z "\\$API_GATEWAY_EXTERNAL_IP" ]; then
+            echo "⚠️  No se obtuvo una IP externa para API Gateway tras esperar 150 segundos."
+            # exit 1 # Considerar si el pipeline debe fallar aquí, como en el ejemplo de Locust (actualmente comentado).
+          fi
+
         '''
       }
     }
