@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      image 'mcr.microsoft.com/azure-cli'  // imagen oficial con az y kubectl
+      image 'maven:3.9.6-eclipse-temurin-11'  // imagen oficial con az y kubectl
       args '-u 0:0'
     }
   }
@@ -17,6 +17,31 @@ pipeline {
   }
 
   stages {
+
+    stage('Prepare Env') {
+      steps {
+        script {
+          // Instalar docker-compose, az y kubectl si no están disponibles
+          sh '''
+            echo "Instalando docker-compose..."
+            if ! command -v docker-compose &> /dev/null; then
+              apt-get update && apt-get install -y docker-compose
+            fi
+
+            echo "Instalando Azure CLI..."
+            if ! command -v az &> /dev/null; then
+              curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+            fi
+
+            echo "Instalando kubectl..."
+            if ! command -v kubectl &> /dev/null; then
+              az aks install-cli
+            fi
+          '''
+        }
+      }
+    }
+
     stage('User Input') {
       steps {
         script {
@@ -51,12 +76,6 @@ pipeline {
     }
 
     stage('Build and Push Docker Images') {
-      agent {
-        docker {
-          image 'docker/compose:1.29.2' // o una versión que incluya ambas cosas
-          args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-      }
       steps {
         withCredentials([usernamePassword(
           credentialsId: 'docker-hub-credentials',
@@ -174,7 +193,7 @@ pipeline {
         '''
       }
     }
-    */
+    
     stage('Desplegar Locust') {
       when {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
@@ -202,5 +221,6 @@ pipeline {
         '''
       }
     }
+    */
   }
 }
