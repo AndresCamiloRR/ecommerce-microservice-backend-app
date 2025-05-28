@@ -68,7 +68,6 @@ class UserServiceIntegrationTest {
                 .credentialDto(credentialDto)
                 .build();
 
-        // Entidad User para comparaciones directas con el repositorio
         Credential credential = Credential.builder()
             .username(DEFAULT_USERNAME)
             .password(DEFAULT_PASSWORD)
@@ -86,7 +85,6 @@ class UserServiceIntegrationTest {
                 .imageUrl(DEFAULT_IMAGE_URL)
                 .credential(credential)
                 .build();
-        // Link credential to user for bidirectional relationship if necessary in your mapping
         if (credential != null) {
             credential.setUser(user);
         }
@@ -115,19 +113,19 @@ class UserServiceIntegrationTest {
 
     @Test
     void updateUser_shouldModifyExistingUser() {
-        User savedEntity = userRepository.saveAndFlush(user); // Guardar entidad base
+        User savedEntity = userRepository.saveAndFlush(user);
 
         UserDto dtoToUpdate = UserDto.builder()
                 .userId(savedEntity.getUserId())
                 .firstName(UPDATED_FIRST_NAME)
                 .lastName(UPDATED_LAST_NAME)
                 .email(UPDATED_EMAIL)
-                .phone(savedEntity.getPhone()) // Keep other fields same or update as needed
+                .phone(savedEntity.getPhone())
                 .imageUrl(savedEntity.getImageUrl())
-                .credentialDto(CredentialDto.builder() // Assume credential details might also be updatable or need to be passed
+                .credentialDto(CredentialDto.builder()
                     .credentialId(savedEntity.getCredential().getCredentialId())
-                    .username(savedEntity.getCredential().getUsername()) // Usually username is not updated, but depends on logic
-                    .password(savedEntity.getCredential().getPassword()) // Password update logic might be different
+                    .username(savedEntity.getCredential().getUsername())
+                    .password(savedEntity.getCredential().getPassword())
                     .isEnabled(savedEntity.getCredential().getIsEnabled())
                     .isAccountNonExpired(savedEntity.getCredential().getIsAccountNonExpired())
                     .isAccountNonLocked(savedEntity.getCredential().getIsAccountNonLocked())
@@ -185,7 +183,7 @@ class UserServiceIntegrationTest {
 
     @Test
     void findByUsername_whenExists_shouldReturnUser() {
-        userRepository.saveAndFlush(user); // Ensure user with DEFAULT_USERNAME is in DB
+        userRepository.saveAndFlush(user);
 
         UserDto foundDto = userService.findByUsername(DEFAULT_USERNAME);
 
@@ -207,7 +205,6 @@ class UserServiceIntegrationTest {
     void findAll_shouldReturnAllUsers() {
         userRepository.saveAndFlush(user); // User 1
 
-        // Create and save another user
         Credential credential2 = Credential.builder().username("janedoe").password("pw").isEnabled(true).isAccountNonExpired(true).isAccountNonLocked(true).isCredentialsNonExpired(true).build();
         User user2 = User.builder().firstName("Jane").lastName("Doe").email("jane@example.com").phone("0987654321").imageUrl("http://example.com/jane.jpg").credential(credential2).build();
         credential2.setUser(user2);
@@ -217,7 +214,6 @@ class UserServiceIntegrationTest {
 
         assertThat(users).isNotNull();
         assertThat(users.size()).isEqualTo(2);
-        // Add more specific assertions if needed, e.g., check for presence of specific users
         assertThat(users.stream().anyMatch(u -> u.getFirstName().equals(DEFAULT_FIRST_NAME))).isTrue();
         assertThat(users.stream().anyMatch(u -> u.getFirstName().equals("Jane"))).isTrue();
     }

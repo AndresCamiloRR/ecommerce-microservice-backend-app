@@ -11,9 +11,6 @@ pipeline {
     CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
-    NEWMAN_IMAGE_NAME = 'yourdockerhubusername/ecommerce-newman-runner' // ¡¡CAMBIA ESTO por tu usuario de Docker Hub y nombre de imagen!!
-    NEWMAN_IMAGE_TAG = "latest" // O puedes usar algo como "${env.BUILD_NUMBER}"
-    NEWMAN_REPORTS_DIR = 'newman-reports' // Directorio para los reportes de Newman
   }
 
   stages {
@@ -221,7 +218,7 @@ pipeline {
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/newman-e2e-job.yaml
           kubectl wait --for=condition=complete job/newman-e2e-job --timeout=600s
           echo "Fetching Newman results..."
-          kubectl logs job/newman-e2e-tests
+          kubectl logs job/newman-e2e-job
         '''
       }
     }

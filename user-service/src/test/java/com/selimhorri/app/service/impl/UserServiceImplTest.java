@@ -50,10 +50,7 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
 
-        // Entidad User para comparaciones directas con el repositorio
         Credential credential = Credential.builder()
-            // Assuming credential might also have an ID, though not strictly necessary for this fix
-            // .credentialId(1) 
             .username(DEFAULT_USERNAME)
             .password(DEFAULT_PASSWORD)
             .isEnabled(true)
@@ -63,7 +60,7 @@ class UserServiceImplTest {
             .build();
 
         user = User.builder()
-                .userId(1) // This is the crucial fix for the findById test
+                .userId(1)
                 .firstName(DEFAULT_FIRST_NAME)
                 .lastName(DEFAULT_LAST_NAME)
                 .email(DEFAULT_EMAIL)
@@ -71,7 +68,7 @@ class UserServiceImplTest {
                 .imageUrl(DEFAULT_IMAGE_URL)
                 .credential(credential)
                 .build();
-        // Link credential to user for bidirectional relationship if necessary in your mapping
+
         if (credential != null) {
             credential.setUser(user);
         }
@@ -110,9 +107,8 @@ class UserServiceImplTest {
 
     @Test
     void save_shouldReturnSavedUserDto() {
-        // 1. Prepare the Credential and User entities that we expect to work with.
         Credential credentialEntity = Credential.builder()
-            .credentialId(1) // Assuming an ID for mapping if necessary
+            .credentialId(1)
             .username("testsaveuser")
             .password("password")
             .isEnabled(true)
@@ -122,36 +118,22 @@ class UserServiceImplTest {
             .build();
 
         User userEntity = User.builder()
-            .userId(1) // Assuming an ID
+            .userId(1)
             .firstName("TestSave")
             .lastName("UserSave")
             .email("testsave@example.com")
-            .credential(credentialEntity) // Associate credential with user
+            .credential(credentialEntity)
             .build();
         
-        // Establish the bidirectional relationship if your JPA/mapping setup relies on it.
-        // This is crucial if the mapping logic navigates from credential back to user.
+        // Relación bidireccional entre User y Credential
         credentialEntity.setUser(userEntity);
 
-        // 2. Create the UserDto that will be the input to the service's save method.
-        // UserMappingHelper.map(userEntity) will convert the User entity (with its Credential) to UserDto (with CredentialDto).
-        // This step simulates what would happen if you had a User entity and wanted to create a DTO from it.
         UserDto userDtoInput = UserMappingHelper.map(userEntity);
-        // Ensure the credential DTO part is also correctly mapped for the input if needed,
-        // or that UserMappingHelper.map(userEntity) correctly populates it.
-        // For this test, userDtoInput is the argument to userService.save().
-
-        // 3. Mock the repository's save method.
-        // When userRepository.save() is called with any User object,
-        // it should return our fully initialized userEntity (which includes the credential).
-        // The UserServiceImpl will then call UserMappingHelper.map() on this returned userEntity.
-        // This is where the NPE was likely occurring if the returned User had a null credential.
+        
         when(this.userRepository.save(any(User.class))).thenReturn(userEntity);
 
-        // 4. Call the service method.
         UserDto savedUserDto = this.userService.save(userDtoInput);
 
-        // 5. Assertions.
         assertNotNull(savedUserDto, "Saved UserDto should not be null");
         assertEquals(userEntity.getUserId(), savedUserDto.getUserId(), "User ID mismatch");
         assertEquals(userEntity.getFirstName(), savedUserDto.getFirstName(), "First name mismatch");
@@ -159,7 +141,6 @@ class UserServiceImplTest {
         
         assertNotNull(savedUserDto.getCredentialDto(), "CredentialDto in saved UserDto should not be null");
         assertEquals(credentialEntity.getUsername(), savedUserDto.getCredentialDto().getUsername(), "Username in CredentialDto mismatch");
-        // Add more assertions for other credential fields if necessary
 
         verify(this.userRepository, times(1)).save(any(User.class));
     }
