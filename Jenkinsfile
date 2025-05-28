@@ -31,7 +31,7 @@ pipeline {
         checkout scm
       }
     }
-    /*
+    
     stage('Build') {
       agent {
         docker {
@@ -87,7 +87,7 @@ pipeline {
         }
       }
     }
-    */
+    
 
     stage('Login Azure') {
       steps {
