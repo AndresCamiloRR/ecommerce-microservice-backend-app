@@ -213,7 +213,7 @@ pipeline {
     }
     stage('Correr e2e') {
       when {
-        expression { env.PROFILE == 'dev' }
+        expression { env.PROFILE == 'stage' }
       }
       steps {
         sh '''
