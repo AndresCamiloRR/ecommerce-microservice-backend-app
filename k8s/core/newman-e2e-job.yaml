@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: newman-e2e-tests
+  name: newman-e2e-job
 spec:
   template:
     metadata:
