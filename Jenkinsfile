@@ -99,9 +99,18 @@ pipeline {
           tenantIdVariable: 'AZ_TENANT_ID'
         )]) {
           sh '''
-            echo "Iniciando sesión en Azure..."
-            az login --service-principal -u $AZ_CLIENT_ID -p $AZ_CLIENT_SECRET --tenant $AZ_TENANT_ID
-            az account set --subscription $AZ_SUBSCRIPTION_ID
+
+            set -x
+            echo "Attempting Azure login..."
+            echo "AZ_CLIENT_ID is present (masked): $AZ_CLIENT_ID"
+            echo "AZ_TENANT_ID is present (masked): $AZ_TENANT_ID"
+            echo "Checking az version..."
+            az --version
+            echo "Attempting login now..."
+            az login --service-principal -u "$AZ_CLIENT_ID" -p "$AZ_CLIENT_SECRET" --tenant "$AZ_TENANT_ID" --output none
+            echo "Setting Azure subscription..."
+            az account set --subscription "$AZ_SUBSCRIPTION_ID" --output none
+            echo "Azure login and subscription set successfully."
           '''
         }
       }
