@@ -88,7 +88,7 @@ pipeline {
         checkout scm
       }
     }
-    
+    /*
     stage('Build') {
       steps {
         sh '''
@@ -129,7 +129,7 @@ pipeline {
       }
     }
     
-
+    */
     stage('Login Azure') {
       steps {
         withCredentials([azureServicePrincipal(
