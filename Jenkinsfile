@@ -33,12 +33,6 @@ pipeline {
     }
     
     stage('Build') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
-          args '-u 0:0 -v $WORKSPACE:/workspace -w /workspace'
-        }
-      }
       steps {
         sh '''
           echo "Building the project..."
@@ -48,12 +42,6 @@ pipeline {
     }
 
     stage('Unit and Integration Tests') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-11' // Maven + JDK 11
-          args '-u 0:0 -v $WORKSPACE:/workspace -w /workspace'
-        }
-      }
       steps {
         sh '''
           echo "Running unit and integration tests..."
