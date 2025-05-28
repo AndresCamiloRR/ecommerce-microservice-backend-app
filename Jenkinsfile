@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       image 'maven:3.9.6-eclipse-temurin-11'  // imagen oficial con az y kubectl
-      args '-u 0:0'
+      args '-u 0:0 -v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket
     }
   }
 
@@ -23,19 +23,51 @@ pipeline {
         script {
           // Instalar docker-compose, az y kubectl si no están disponibles
           sh '''
+            apt-get update && apt-get install -y ca-certificates curl gnupg apt-transport-https
+
+            # Setup Docker repository and install Docker CLI
+            echo "Configurando repositorio de Docker..."
+            install -m 0755 -d /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            chmod a+r /etc/apt/keyrings/docker.gpg
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+              $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+              tee /etc/apt/sources.list.d/docker.list > /dev/null
+            
+            # Setup Kubernetes repository
+            echo "Configurando repositorio de Kubernetes..."
+            curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+            echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
+
+            apt-get update
+
+            echo "Instalando Docker CLI..."
+            if ! command -v docker &> /dev/null; then
+              apt-get install -y docker-ce-cli
+            else
+              echo "Docker CLI ya está instalado."
+            fi
+
             echo "Instalando docker-compose..."
             if ! command -v docker-compose &> /dev/null; then
-              apt-get update && apt-get install -y docker-compose
+              apt-get install -y docker-compose
+            else
+              echo "docker-compose ya está instalado."
             fi
 
             echo "Instalando Azure CLI..."
             if ! command -v az &> /dev/null; then
               curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+            else
+              echo "Azure CLI ya está instalado."
             fi
 
             echo "Instalando kubectl..."
             if ! command -v kubectl &> /dev/null; then
-              az aks install-cli
+              apt-get install -y kubectl
+            else
+              echo "kubectl ya está instalado."
             fi
           '''
         }
