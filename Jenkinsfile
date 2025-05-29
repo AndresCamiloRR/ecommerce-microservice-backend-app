@@ -177,8 +177,8 @@ pipeline {
           kubectl apply -f ${K8S_MANIFESTS_DIR}/core/locust-deployment.yaml
           echo "Waiting for Locust IP address..."
           sleep 30 # Esperar a que el balanceador de carga asigne la IP
-          echo "Locust IP Address:"
-          kubectl get service locust -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+          LOCUST_IP=$(kubectl get service locust -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo "Locust IP: $LOCUST_IP:8089"
         '''
       }
     }
