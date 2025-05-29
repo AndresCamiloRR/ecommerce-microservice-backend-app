@@ -30,7 +30,7 @@ pipeline {
         checkout scm
       }
     }
-    
+    /*
     stage('Build') {
       steps {
         sh '''
@@ -194,7 +194,7 @@ pipeline {
         '''
       }
     }
-
+    */
     stage('Generar Release Notes') {
       when {
         expression { env.PROFILE == 'prod' }
@@ -213,7 +213,7 @@ pipeline {
             git tag ${tag}
 
             echo "Generando Release Notes en GitHub (esto también pusheará el tag si es necesario)..."
-            gh release create ${tag} --generate-notes --title "${title}"
+            GH_TOKEN='${env.GH_TOKEN}' gh release create ${tag} --generate-notes --title "${title}"
           """
         }
       }
