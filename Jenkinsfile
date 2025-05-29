@@ -218,6 +218,8 @@ pipeline {
             sh """
               git config user.email "ci-bot@example.com"
               git config user.name "CI Bot"
+              # Configure git to use the GH_TOKEN for https operations on github.com
+              git config --global url."https://oauth2:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
               git tag ${tag}
               git push origin ${tag}
               gh release create ${tag} --generate-notes --title "${title}"
