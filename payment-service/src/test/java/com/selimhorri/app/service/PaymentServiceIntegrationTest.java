@@ -56,7 +56,6 @@ class PaymentServiceIntegrationTest {
                 .orderDto(orderDto)
                 .build();
 
-        // Entidad Payment para comparaciones directas con el repositorio
         payment = Payment.builder()
                 .orderId(DEFAULT_ORDER_ID)
                 .isPayed(DEFAULT_IS_PAYED)
@@ -69,7 +68,7 @@ class PaymentServiceIntegrationTest {
         PaymentDto savedPaymentDto = paymentService.save(paymentDto);
 
         assertThat(savedPaymentDto).isNotNull();
-        assertThat(savedPaymentDto.getPaymentId()).isNotNull(); // El ID debe generarse al guardar
+        assertThat(savedPaymentDto.getPaymentId()).isNotNull();
         assertThat(savedPaymentDto.getIsPayed()).isEqualTo(DEFAULT_IS_PAYED);
         assertThat(savedPaymentDto.getPaymentStatus()).isEqualTo(DEFAULT_PAYMENT_STATUS);
         assertThat(savedPaymentDto.getOrderDto().getOrderId()).isEqualTo(DEFAULT_ORDER_ID);
@@ -83,13 +82,13 @@ class PaymentServiceIntegrationTest {
 
     @Test
     void updatePayment_shouldModifyExistingPayment() {
-        Payment savedEntity = paymentRepository.saveAndFlush(payment); // Guardar entidad base
+        Payment savedEntity = paymentRepository.saveAndFlush(payment);
 
         PaymentDto dtoToUpdate = PaymentDto.builder()
                 .paymentId(savedEntity.getPaymentId())
                 .isPayed(UPDATED_IS_PAYED)
                 .paymentStatus(UPDATED_PAYMENT_STATUS)
-                .orderDto(OrderDto.builder().orderId(savedEntity.getOrderId()).build()) // Mantener el orderId
+                .orderDto(OrderDto.builder().orderId(savedEntity.getOrderId()).build())
                 .build();
 
         PaymentDto updatedDto = paymentService.update(dtoToUpdate);
@@ -110,7 +109,7 @@ class PaymentServiceIntegrationTest {
         Payment savedEntity = paymentRepository.saveAndFlush(payment);
         Integer paymentIdToDelete = savedEntity.getPaymentId();
 
-        assertThat(paymentRepository.findById(paymentIdToDelete)).isPresent(); // Verificar que existe antes de borrar
+        assertThat(paymentRepository.findById(paymentIdToDelete)).isPresent();
 
         paymentService.deleteById(paymentIdToDelete);
 
@@ -120,10 +119,6 @@ class PaymentServiceIntegrationTest {
     @Test
     void findPaymentById_whenNotExists_shouldThrowException() {
         Integer nonExistentId = -99;
-        // Asumiendo que el servicio lanza una excepción específica o genérica cuando no encuentra la entidad.
-        // Esto dependerá de la implementación de PaymentServiceImpl.
-        // Por ejemplo, si lanza JpaObjectRetrievalFailureException o una custom.
-        // Aquí usaremos una genérica para el ejemplo, ajustar según la implementación real.
         assertThrows(Exception.class, () -> {
             paymentService.findById(nonExistentId);
         });

@@ -1,16 +1,16 @@
 pipeline {
   agent {
     docker {
-      image 'leferez/jenkins-agent:latest'  // imagen personalizada
-      args '-u 0:0 -v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket
+      image 'leferez/jenkins-agent:latest'
+      args '-u 0:0 -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
 
   environment {
-    RESOURCE_GROUP = 'mi-grupo'          // Ejemplo: nombre real de tu resource group
-    CLUSTER_NAME = 'mi-cluster'       // Ejemplo: nombre real de tu clúster AKS
+    RESOURCE_GROUP = 'mi-grupo'          // Nombre del resource group
+    CLUSTER_NAME = 'mi-cluster'       // Nombre del clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
-    AZURE_CREDENTIALS_ID = 'azure-service-principal'  // Este sí es el ID de la credencial de Jenkins
+    AZURE_CREDENTIALS_ID = 'azure-service-principal'  // ID de las credenciales de Azure en Jenkins
   }
 
   stages {
