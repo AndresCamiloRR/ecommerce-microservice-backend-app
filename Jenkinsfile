@@ -199,7 +199,7 @@ pipeline {
         expression { env.PROFILE == 'prod' }
       }
       steps {
-        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
+        withCredentials([string(credentialsId: 'github-token-txt', variable: 'GH_TOKEN')]) {
           sh '''
             echo "Generando release notes automáticas para producción..."
 
