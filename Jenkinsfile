@@ -211,13 +211,15 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'github-token-txt', variable: 'GH_TOKEN')]) {
           script {
-            def tag = "v1.0.${env.BUILD_NUMBER}"
+            def now = new Date()
+            def tag = now.format('MM.dd.HH.mm')
             def title = "Release ${tag}"
 
             sh """
               git config user.email "ci-bot@example.com"
               git config user.name "CI Bot"
               git tag ${tag}
+              git push origin ${tag}
               gh release create ${tag} --generate-notes --title "${title}"
             """
           }
