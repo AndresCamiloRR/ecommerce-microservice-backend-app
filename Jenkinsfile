@@ -11,7 +11,7 @@ pipeline {
     CLUSTER_NAME = 'mi-cluster'       // Nombre del clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // ID de las credenciales de Azure en Jenkins
-    GH_TOKEN = credentials('github-token')
+    GH_TOKEN = credentials('github-token-txt')
   }
 
   stages {
