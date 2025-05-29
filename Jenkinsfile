@@ -30,7 +30,7 @@ pipeline {
         checkout scm
       }
     }
-    /*
+    
     stage('Build') {
       steps {
         sh '''
@@ -194,7 +194,7 @@ pipeline {
         '''
       }
     }
-    */
+    
     stage('Test GH Auth') {
       steps {
         withCredentials([string(credentialsId: 'github-token-txt', variable: 'GH_TOKEN')]) {
