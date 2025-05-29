@@ -209,13 +209,12 @@ pipeline {
         expression { env.PROFILE == 'prod' }
       }
       steps {
-        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
+        withCredentials([string(credentialsId: 'github-token-txt', variable: 'GH_TOKEN')]) {
           script {
             def tag = "v1.0.${env.BUILD_NUMBER}"
             def title = "Release ${tag}"
 
             sh """
-              echo "$GH_TOKEN" | gh auth login --with-token
               git config user.email "ci-bot@example.com"
               git config user.name "CI Bot"
               git tag ${tag}
