@@ -11,6 +11,7 @@ pipeline {
     CLUSTER_NAME = 'mi-cluster'       // Nombre del clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // ID de las credenciales de Azure en Jenkins
+    GH_TOKEN = credentials('github-token')
   }
 
   stages {
@@ -199,29 +200,22 @@ pipeline {
         expression { env.PROFILE == 'prod' }
       }
       steps {
-        withCredentials([string(credentialsId: 'github-token-txt', variable: 'GH_TOKEN')]) {
-          sh '''
-            echo "Generando release notes automáticas para producción..."
+        script {
+          def tag = "v1.0.${env.BUILD_NUMBER}"
+          def title = "Release ${tag}"
 
-            echo "Logging in to GitHub CLI and setting up git credentials..."
-            # Authenticate gh CLI with the token and configure git to use gh as a credential helper
-            echo "$GH_TOKEN" | gh auth login --hostname github.com --with-token
-            gh auth setup-git
-            echo "GitHub CLI login and git setup complete."
+          sh """
+            echo "Configurando git..."
+            git config user.email "ci-bot@example.com"
+            git config user.name "CI Bot"
 
-            # Crear un nuevo tag con timestamp
-            TAG="v$(date +%Y.%m.%d.%H%M%S)"
-            git config user.email "ci@jenkins.local"
-            git config user.name "Jenkins CI"
-            git tag "$TAG"
-            echo "Pushing tag $TAG to origin..."
-            git push origin "$TAG"
+            echo "Creando y pusheando tag: ${tag}"
+            git tag ${tag}
+            git push origin ${tag}
 
-            # Crear la release con notas generadas automáticamente
-            echo "Creating GitHub release $TAG..."
-            gh release create "$TAG" --generate-notes --title "Release $TAG"
-            echo "Release $TAG created successfully."
-          '''
+            echo "Generando Release Notes en GitHub..."
+            gh release create ${tag} --generate-notes --title "${title}"
+          """
         }
       }
     }
