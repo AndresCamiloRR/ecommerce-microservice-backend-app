@@ -11,7 +11,7 @@ pipeline {
     CLUSTER_NAME = 'mi-cluster'       // Nombre del clúster AKS
     K8S_MANIFESTS_DIR = 'k8s'                   // Carpeta local en el repo
     AZURE_CREDENTIALS_ID = 'azure-service-principal'  // ID de las credenciales de Azure en Jenkins
-    GH_TOKEN = 'github-token-txt'
+    GH_TOKEN = credentials('github-token')
   }
 
   stages {
@@ -197,7 +197,12 @@ pipeline {
     */
     stage('Test GH Auth') {
       steps {
-        sh 'GH_TOKEN=${GH_TOKEN} gh auth status'
+        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
+          sh '''
+            echo "$GH_TOKEN" | gh auth login --with-token
+            gh auth status
+          '''
+        }
       }
     }
 
@@ -206,24 +211,21 @@ pipeline {
         expression { env.PROFILE == 'prod' }
       }
       steps {
-        script {
-          def tag = "v1.0.${env.BUILD_NUMBER}"
-          def title = "Release ${tag}"
+        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
+          script {
+            def tag = "v1.0.${env.BUILD_NUMBER}"
+            def title = "Release ${tag}"
 
-          sh """
-            echo "Configurando git..."
-            git config user.email "ci-bot@example.com"
-            git config user.name "CI Bot"
-
-            echo "Creando tag localmente: ${tag}"
-            git tag ${tag}
-
-            echo "Generando Release Notes en GitHub (esto también pusheará el tag si es necesario)..."
-            GH_TOKEN='${env.GH_TOKEN}' gh release create ${tag} --generate-notes --title "${title}"
-          """
+            sh """
+              echo "$GH_TOKEN" | gh auth login --with-token
+              git config user.email "ci-bot@example.com"
+              git config user.name "CI Bot"
+              git tag ${tag}
+              gh release create ${tag} --generate-notes --title "${title}"
+            """
+          }
         }
       }
     }
-    
   }
 }
