@@ -197,7 +197,6 @@ pipeline {
     */
     stage('Test GH Auth') {
       steps {
-        withCredentials([string(credentialsId: 'github-token-txt', variable: 'GH_TOKEN')]) {
           sh '''
             echo "$GH_TOKEN" | gh auth login --with-token
             gh auth status
