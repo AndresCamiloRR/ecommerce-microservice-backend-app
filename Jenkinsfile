@@ -197,11 +197,10 @@ pipeline {
     */
     stage('Test GH Auth') {
       steps {
-          sh '''
-            echo "$GH_TOKEN" | gh auth login --with-token
-            gh auth status
-          '''
-        }
+        sh '''
+          echo "$GH_TOKEN" | gh auth login --with-token
+          gh auth status
+        '''
       }
     }
 
