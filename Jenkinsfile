@@ -195,6 +195,12 @@ pipeline {
       }
     }
     */
+    stage('Test GH Auth') {
+      steps {
+        sh 'GH_TOKEN=${GH_TOKEN} gh auth status'
+      }
+    }
+
     stage('Generar Release Notes') {
       when {
         expression { env.PROFILE == 'prod' }
