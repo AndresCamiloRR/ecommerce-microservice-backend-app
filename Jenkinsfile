@@ -29,7 +29,7 @@ pipeline {
         checkout scm
       }
     }
-    /*
+    
     stage('Build') {
       steps {
         sh '''
@@ -69,7 +69,7 @@ pipeline {
         }
       }
     }
-    */
+    
     
     stage('Login Azure') {
       steps {
@@ -109,7 +109,7 @@ pipeline {
         '''
       }
     }
-    /*
+    
     stage('Desplegar manifiestos') {
       steps {
         sh '''
@@ -166,7 +166,18 @@ pipeline {
         '''
       }
     }
-    */
+
+    stage('IP de api-gateway') {
+      steps {
+        sh '''
+          echo "Waiting for API Gateway IP address..."
+          sleep 30 # Esperar a que el balanceador de carga asigne la IP
+          GATEWAY_IP=$(kubectl get service api-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo "API Gateway URL: http://$GATEWAY_IP:8080"
+        '''
+      }
+    }
+
     stage('Desplegar Locust') {
       when {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
@@ -178,8 +189,31 @@ pipeline {
           echo "Waiting for Locust IP address..."
           sleep 30 # Esperar a que el balanceador de carga asigne la IP
           LOCUST_IP=$(kubectl get service locust -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-          echo "Locust IP: $LOCUST_IP:8089"
+          echo "Locust URL: http://$LOCUST_IP:8089"
         '''
+      }
+    }
+
+    stage('Generar Release Notes') {
+      when {
+        expression { env.PROFILE == 'prod' }
+      }
+      steps {
+        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
+          sh '''
+            echo "Generando release notes automáticas para producción..."
+
+            # Crear un nuevo tag con timestamp
+            TAG="v$(date +%Y.%m.%d.%H%M%S)"
+            git config user.email "ci@jenkins.local"
+            git config user.name "Jenkins CI"
+            git tag "$TAG"
+            git push origin "$TAG"
+
+            # Crear la release con notas generadas automáticamente
+            gh release create "$TAG" --generate-notes --title "Release $TAG"
+          '''
+        }
       }
     }
     
