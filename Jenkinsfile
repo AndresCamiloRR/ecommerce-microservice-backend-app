@@ -69,7 +69,7 @@ pipeline {
         }
       }
     }
-    
+    */
     
     stage('Login Azure') {
       steps {
@@ -109,7 +109,7 @@ pipeline {
         '''
       }
     }
-    
+    /*
     stage('Desplegar manifiestos') {
       steps {
         sh '''
