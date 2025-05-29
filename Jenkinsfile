@@ -209,11 +209,10 @@ pipeline {
             git config user.email "ci-bot@example.com"
             git config user.name "CI Bot"
 
-            echo "Creando y pusheando tag: ${tag}"
+            echo "Creando tag localmente: ${tag}"
             git tag ${tag}
-            git push origin ${tag}
 
-            echo "Generando Release Notes en GitHub..."
+            echo "Generando Release Notes en GitHub (esto también pusheará el tag si es necesario)..."
             gh release create ${tag} --generate-notes --title "${title}"
           """
         }
