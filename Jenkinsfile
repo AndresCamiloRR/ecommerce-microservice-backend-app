@@ -203,15 +203,24 @@ pipeline {
           sh '''
             echo "Generando release notes automáticas para producción..."
 
+            echo "Logging in to GitHub CLI and setting up git credentials..."
+            # Authenticate gh CLI with the token and configure git to use gh as a credential helper
+            echo "$GH_TOKEN" | gh auth login --hostname github.com --with-token
+            gh auth setup-git
+            echo "GitHub CLI login and git setup complete."
+
             # Crear un nuevo tag con timestamp
             TAG="v$(date +%Y.%m.%d.%H%M%S)"
             git config user.email "ci@jenkins.local"
             git config user.name "Jenkins CI"
             git tag "$TAG"
+            echo "Pushing tag $TAG to origin..."
             git push origin "$TAG"
 
             # Crear la release con notas generadas automáticamente
+            echo "Creating GitHub release $TAG..."
             gh release create "$TAG" --generate-notes --title "Release $TAG"
+            echo "Release $TAG created successfully."
           '''
         }
       }
