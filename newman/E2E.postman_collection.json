@@ -369,21 +369,9 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "http://{{prefix}}user-service/api/users/{{userId}}",
 							"protocol": "http",
@@ -1287,16 +1275,9 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "http://{{prefix}}favourite-service/api/favourites",
 							"protocol": "http",
@@ -1401,16 +1382,9 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "http://{{prefix}}favourite-service/api/favourites",
 							"protocol": "http",
@@ -1462,10 +1436,6 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"orderId\": {{$randomInt}},\r\n    \"orderDate\": \"23-05-2025__02:05:55:547092\",\r\n    \"orderDesc\": \"{{$randomLoremWord}}\",\r\n    \"orderFee\": {{$randomPrice}},\r\n    \"cart\": {\r\n        \"cartId\": {{cartId}},\r\n        \"userId\": {{userId}}\r\n    }\r\n}\r\n"
-						},
 						"url": {
 							"raw": "http://{{prefix}}user-service/api/users/{{userId}}",
 							"protocol": "http",
@@ -1522,16 +1492,9 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"orderId\": {{$randomInt}},\r\n    \"orderDate\": \"23-05-2025__02:05:55:547092\",\r\n    \"orderDesc\": \"{{$randomLoremWord}}\",\r\n    \"orderFee\": {{$randomPrice}},\r\n    \"cart\": {\r\n        \"cartId\": {{cartId}},\r\n        \"userId\": {{userId}}\r\n    }\r\n}\r\n"
-						},
 						"url": {
 							"raw": "http://{{prefix}}user-service/api/users",
 							"protocol": "http",
