@@ -195,15 +195,6 @@ pipeline {
       }
     }
     
-    stage('Test GH Auth') {
-      steps {
-        withCredentials([string(credentialsId: 'github-token-txt', variable: 'GH_TOKEN')]) {
-          sh '''
-            gh auth status
-          '''
-        }
-      }
-    }
     stage('Generar Release Notes') {
       when {
         expression { env.PROFILE == 'prod' }
@@ -214,20 +205,66 @@ pipeline {
             def now = new Date()
             def tag = now.format('MM.dd.HH.mm')
             def title = "Release ${tag}"
+            def commitHash = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+            def commitMessage = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+            def recentCommits = sh(returnStdout: true, script: 'git log --oneline -n 5').trim()
+            def changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~5..HEAD || echo "No changes detected"').trim()
 
+            def notes = """
+# 🚀 Release Notes - ${tag}
+
+**📅 Fecha:** ${now.format('yyyy-MM-dd HH:mm:ss')}  
+**🔑 Commit Actual:** ${commitHash}  
+
+## 🆕 Último Commit
+${commitMessage}
+
+## 📜 Últimos 5 Commits
+${recentCommits}
+
+## 📂 Archivos Modificados
+${changedFiles}
+
+## ✅ Validaciones Automatizadas
+- Pruebas unitarias en user-service
+- Pruebas de integración en user-service y payment-service
+- Pruebas End-to-End con Postman Newman
+- Pruebas de carga con Locust en el puerto 8089
+- Retornar las IPs de los servicios desplegados api-gateway y locust
+
+## 🧩 Microservicios involucrados
+- api-gateway
+- cloud-config
+- favourite-service
+- locust (para pruebas de carga)
+- newman (como un job de Kubernetes)
+- order-service
+- payment-service
+- product-service
+- proxy-client
+- shipping-service
+- user-service
+- zipkin
+
+"""
+
+            // Ejecutar los comandos shell
             sh """
               git config user.email "ci-bot@example.com"
               git config user.name "CI Bot"
-              # Configure git to use the GH_TOKEN for https operations on github.com
               git config --global url."https://oauth2:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+              
               git tag ${tag}
               git push origin ${tag}
-              gh release create ${tag} --generate-notes --title "${title}"
+              gh release create ${tag} --title "${title}" --notes "${notes}"
             """
+
+            echo "✅ Release ${tag} creado con changelog personalizado"
           }
         }
       }
     }
+
 
   }
 }
