@@ -15,7 +15,7 @@ pipeline {
   }
 
   stages {
-
+    
     stage('User Input') {
       steps {
         script {
@@ -24,7 +24,7 @@ pipeline {
         }
       }
     }
-
+    /*
     stage('Checkout') {
       steps {
         checkout scm
@@ -178,7 +178,7 @@ pipeline {
         '''
       }
     }
-
+    */
     stage('Desplegar Locust') {
       when {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
