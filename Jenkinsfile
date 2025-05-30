@@ -24,7 +24,7 @@ pipeline {
         }
       }
     }
-    /*
+    
     stage('Checkout') {
       steps {
         checkout scm
@@ -178,7 +178,7 @@ pipeline {
         '''
       }
     }
-    */
+    
     stage('Desplegar Locust') {
       when {
         expression { env.PROFILE == 'dev' || env.PROFILE == 'stage' }
@@ -208,7 +208,7 @@ pipeline {
             def commitHash = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
             def commitMessage = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
             def recentCommits = sh(returnStdout: true, script: 'git log --oneline -n 5').trim()
-            def changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~5..HEAD || echo "No changes detected"').trim()
+            def changedFiles = sh(returnStdout: true, script: 'git diff --name-only 695a6d49a8fb5559b025e22017df1ec657104309..HEAD || echo "No changes detected"').trim()
 
             def notes = """
 # 🚀 Release Notes - ${tag}
